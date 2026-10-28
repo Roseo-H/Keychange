@@ -103,9 +103,25 @@
       border-radius: 18px;
       box-shadow: 0 8px 24px rgba(0, 20, 60, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5);
       transition: transform 0.2s;
+      -webkit-tap-highlight-color: transparent;
     }
     .merk:hover { transform: scale(1.07) rotate(-4deg); }
     .merk svg { width: 100%; height: 100%; display: block; }
+    .merk.draai { animation: draai 0.7s ease; }
+    @keyframes draai { to { transform: rotate(360deg); } }
+
+    /* Het logo dat over het scherm vliegt */
+    .vlieger {
+      position: fixed;
+      left: 0;
+      width: 80px;
+      height: 80px;
+      z-index: 50;
+      pointer-events: none;
+      filter: drop-shadow(0 12px 22px rgba(0, 20, 60, 0.5));
+      will-change: transform;
+    }
+    .vlieger svg { width: 100%; height: 100%; display: block; }
 
     /* ---------- Kaart ---------- */
     .kaart {
@@ -172,8 +188,13 @@
       border-color: rgba(255, 255, 255, 0.95);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 4px rgba(255, 255, 255, 0.15), 0 12px 32px rgba(0, 20, 60, 0.3);
     }
+    textarea.verlicht { animation: opflits 0.9s ease-out; }
+    @keyframes opflits {
+      0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.9), 0 12px 32px rgba(0, 20, 60, 0.3); }
+      100% { box-shadow: 0 0 0 26px rgba(255, 255, 255, 0), 0 12px 32px rgba(0, 20, 60, 0.3); }
+    }
 
-    /* ---------- Toonhoogte-knoppen ---------- */
+    /* ---------- Toonhoogte-wielen (slepen of vegen) ---------- */
     .keuzes {
       display: flex;
       gap: 22px;
@@ -185,17 +206,40 @@
     .toonhoogte { display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .toonhoogte .label { font-size: 14px; letter-spacing: 0.6px; text-transform: uppercase; font-weight: 600; opacity: 0.95; }
 
-    .pijl, .letter {
-      cursor: pointer;
-      font-family: var(--kop);
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    .wiel {
+      width: 140px;
+      height: 156px;
+      border-radius: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      touch-action: none;           /* zodat vegen met je vinger de pagina niet scrolt */
+      user-select: none;
+      -webkit-user-select: none;
+      outline: none;
+      transition: background 0.2s, transform 0.15s;
     }
-    .pijl { width: 60px; height: 34px; border-radius: 17px; font-size: 14px; }
-    .letter { width: 130px; height: 88px; border-radius: 28px; font-size: 44px; font-weight: 800; }
+    .wiel:hover { background: rgba(255, 255, 255, 0.22); }
+    .wiel.sleept { cursor: grabbing; background: rgba(255, 255, 255, 0.3); transform: scale(1.03); }
+    .wiel:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
 
-    .pijl:hover, .letter:hover { background: rgba(255, 255, 255, 0.28); }
-    .pijl:active, .letter:active { transform: scale(0.93); }
-    .letter:focus-visible, .pijl:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
+    .wiel .buur {
+      font-family: var(--kop);
+      font-size: 20px;
+      font-weight: 600;
+      height: 30px;
+      line-height: 30px;
+      opacity: 0.5;
+    }
+    .wiel .groot {
+      font-family: var(--kop);
+      font-size: 48px;
+      font-weight: 800;
+      height: 72px;
+      line-height: 72px;
+    }
 
     /* ---------- Capo ---------- */
     .capo {
@@ -209,7 +253,27 @@
     .capo .label { display: block; font-size: 14px; letter-spacing: 0.6px; text-transform: uppercase; font-weight: 600; }
     .capo .getal { font-family: var(--kop); font-size: 44px; font-weight: 800; line-height: 1.1; }
 
-    .tip { margin: 20px 0 0; text-align: center; font-size: 14px; font-weight: 300; opacity: 0.9; }
+    /* ---------- Oké-knop ---------- */
+    .oke {
+      display: block;
+      width: 100%;
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 24px;
+      font-family: var(--kop);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, opacity 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .oke:hover { background: rgba(255, 255, 255, 0.3); }
+    .oke:active { transform: scale(0.97); }
+    .oke:disabled { opacity: 0.55; cursor: default; }
+    .oke:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
+
+    .tip { margin: 18px 0 0; text-align: center; font-size: 14px; font-weight: 300; opacity: 0.9; }
 
     @media (prefers-reduced-motion: reduce) {
       body, .bol, .noot, .eq span { animation: none !important; }
@@ -224,9 +288,9 @@
   <div class="bol drie"></div>
   <div class="noten-regen" id="noten-regen" aria-hidden="true"></div>
 
-  <!-- Logo links boven -->
-  <a class="merk" href="./" aria-label="KeyChanger" title="KeyChanger">
-    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+  <!-- Logo links boven: klik erop om alles terug te zetten -->
+  <a class="merk" id="logo" href="./" aria-label="KeyChanger, alles terugzetten" title="Alles terugzetten">
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
         <linearGradient id="logo-verloop" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#0b5ed7"/>
@@ -246,22 +310,25 @@
 
     <div class="eq" id="eq" aria-hidden="true"></div>
 
-    <textarea id="tekst" class="glass" spellcheck="false" placeholder="Typ of plak hier je akkoorden of songtekst...">Am   G   C   F
-Dit lied gaat van A naar D en dan naar G.</textarea>
+    <textarea id="tekst" class="glass" spellcheck="false" autocomplete="off" placeholder="Typ of plak hier je akkoorden of songtekst..."></textarea>
 
     <div class="keuzes">
       <div class="toonhoogte">
         <span class="label">Originele toonhoogte</span>
-        <button class="pijl glass" data-wie="orig" data-richting="1" aria-label="Originele toonhoogte omhoog">▲</button>
-        <button class="letter glass" id="orig" aria-live="polite">C</button>
-        <button class="pijl glass" data-wie="orig" data-richting="-1" aria-label="Originele toonhoogte omlaag">▼</button>
+        <div class="wiel glass" id="wiel-orig" tabindex="0" role="slider" aria-label="Originele toonhoogte" aria-valuemin="0" aria-valuemax="11">
+          <div class="buur" id="orig-boven"></div>
+          <div class="groot" id="orig">C</div>
+          <div class="buur" id="orig-onder"></div>
+        </div>
       </div>
 
       <div class="toonhoogte">
         <span class="label">Nieuwe toonhoogte</span>
-        <button class="pijl glass" data-wie="nieuw" data-richting="1" aria-label="Nieuwe toonhoogte omhoog">▲</button>
-        <button class="letter glass" id="nieuw" aria-live="polite">C</button>
-        <button class="pijl glass" data-wie="nieuw" data-richting="-1" aria-label="Nieuwe toonhoogte omlaag">▼</button>
+        <div class="wiel glass" id="wiel-nieuw" tabindex="0" role="slider" aria-label="Nieuwe toonhoogte" aria-valuemin="0" aria-valuemax="11">
+          <div class="buur" id="nieuw-boven"></div>
+          <div class="groot" id="nieuw">C</div>
+          <div class="buur" id="nieuw-onder"></div>
+        </div>
       </div>
     </div>
 
@@ -270,7 +337,9 @@ Dit lied gaat van A naar D en dan naar G.</textarea>
       <span class="getal" id="capo">12</span>
     </div>
 
-    <p class="tip">Klik op een letter en gebruik de pijltjestoetsen ↑ en ↓, of klik op ▲ ▼.</p>
+    <button class="oke glass" id="oke" type="button">Oké</button>
+
+    <p class="tip">Sleep of veeg met je vinger of muis omhoog en omlaag over een letter om de toonhoogte te kiezen (het muiswiel werkt ook). Druk daarna op Oké.</p>
   </main>
 
   <script>
@@ -281,19 +350,18 @@ Dit lied gaat van A naar D en dan naar G.</textarea>
     const basis = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 
     const tekstvak = document.getElementById("tekst");
-    const origEl = document.getElementById("orig");
-    const nieuwEl = document.getElementById("nieuw");
     const capoEl = document.getElementById("capo");
+    const okeKnop = document.getElementById("oke");
+    const logo = document.getElementById("logo");
 
     // Positie in de lijst (0 = C ... 11 = B)
     const stand = { orig: 0, nieuw: 0 };
 
-    // De tekst zoals hij in de ORIGINELE toonhoogte is
-    let bron = tekstvak.value;
+    // Hoeveel stappen de tekst al is opgeschoven (zodat een tweede keer Oké niet dubbel schuift)
+    let toegepast = 0;
 
-    // Zoekt alle akkoorden in de tekst (A, Dm, G7, C#, Bb, C/G) en schuift ze zoveel stappen op
-    // als de nieuwe toonhoogte verschilt van de originele: hoger = omhoog, lager = omlaag.
-    // Gewone woorden zoals "Dit" of "Ben" blijven met rust.
+    // Zoekt alle akkoorden in de tekst (A, Dm, G7, C#, Bb, C/G) en schuift ze op.
+    // Positief = omhoog, negatief = omlaag. Gewone woorden zoals "Dit" of "Ben" blijven met rust.
     function transponeer(tekst, stappen) {
       const s = ((stappen % 12) + 12) % 12;
       if (s === 0) return tekst;
@@ -312,39 +380,178 @@ Dit lied gaat van A naar D en dan naar G.</textarea>
       return verschil === 0 ? 12 : verschil;
     }
 
-    function toon() {
-      origEl.textContent = noten[stand.orig];
-      nieuwEl.textContent = noten[stand.nieuw];
-      capoEl.textContent = berekenCapo();
-      tekstvak.value = transponeer(bron, stand.nieuw - stand.orig);
+    // Is de nieuwe toonhoogte hoger? Dan gaan de akkoorden omlaag (en andersom).
+    function gewensteVerschuiving() {
+      return -(stand.nieuw - stand.orig);
     }
 
-    function verplaats(wie, richting) {
-      stand[wie] = Math.min(11, Math.max(0, stand[wie] + richting));
+    // Laat de letters en de capo zien
+    function toon() {
+      ["orig", "nieuw"].forEach(function (wie) {
+        const i = stand[wie];
+        document.getElementById(wie).textContent = noten[i];
+        document.getElementById(wie + "-boven").textContent = i > 0 ? noten[i - 1] : "";
+        document.getElementById(wie + "-onder").textContent = i < 11 ? noten[i + 1] : "";
+        document.getElementById("wiel-" + wie).setAttribute("aria-valuenow", i);
+        document.getElementById("wiel-" + wie).setAttribute("aria-valuetext", noten[i]);
+      });
+      capoEl.textContent = berekenCapo();
+    }
+
+    // Zet een toonhoogte op een nieuwe stand (van C tot B)
+    function zet(wie, waarde) {
+      const w = Math.min(11, Math.max(0, waarde));
+      if (w === stand[wie]) return;
+      stand[wie] = w;
       toon();
       pulseer();
+      if (navigator.vibrate) navigator.vibrate(8);
     }
 
-    // Typ je zelf in het tekstvak, dan onthouden we de tekst in de originele toonhoogte
-    tekstvak.addEventListener("input", function () {
-      bron = transponeer(tekstvak.value, -(stand.nieuw - stand.orig));
-    });
+    // ---------- Bediening met vinger of muis ----------
+    function maakWiel(wiel, wie) {
+      const STAP = 34;            // zoveel pixels slepen = 1 stap
+      let actief = false;
+      let startY = 0;
+      let startStand = 0;
+      let wielTeller = 0;
 
-    // Pijltjes-knoppen (▲ ▼)
-    document.querySelectorAll(".pijl").forEach(function (knop) {
-      knop.addEventListener("click", function () {
-        verplaats(knop.dataset.wie, Number(knop.dataset.richting));
+      wiel.addEventListener("pointerdown", function (e) {
+        actief = true;
+        startY = e.clientY;
+        startStand = stand[wie];
+        wiel.setPointerCapture(e.pointerId);
+        wiel.classList.add("sleept");
+        e.preventDefault();
       });
-    });
 
-    // Pijltjestoetsen op het toetsenbord als een letter-knop is aangeklikt
-    [origEl, nieuwEl].forEach(function (el) {
-      el.addEventListener("keydown", function (e) {
+      wiel.addEventListener("pointermove", function (e) {
+        if (!actief) return;
+        // omhoog slepen = hogere toonhoogte
+        const stappen = Math.round((startY - e.clientY) / STAP);
+        zet(wie, startStand + stappen);
+      });
+
+      function stop() {
+        actief = false;
+        wiel.classList.remove("sleept");
+      }
+      wiel.addEventListener("pointerup", stop);
+      wiel.addEventListener("pointercancel", stop);
+
+      // Muiswiel
+      wiel.addEventListener("wheel", function (e) {
+        e.preventDefault();
+        wielTeller += e.deltaY;
+        if (Math.abs(wielTeller) >= 50) {
+          zet(wie, stand[wie] + (wielTeller > 0 ? 1 : -1));
+          wielTeller = 0;
+        }
+      }, { passive: false });
+
+      // Pijltjestoetsen (voor wie een toetsenbord gebruikt)
+      wiel.addEventListener("keydown", function (e) {
         if (e.key === "ArrowUp" || e.key === "ArrowDown") {
           e.preventDefault();
-          verplaats(el.id, e.key === "ArrowUp" ? 1 : -1);
+          zet(wie, stand[wie] + (e.key === "ArrowUp" ? 1 : -1));
         }
       });
+    }
+
+    maakWiel(document.getElementById("wiel-orig"), "orig");
+    maakWiel(document.getElementById("wiel-nieuw"), "nieuw");
+
+    // ---------- Tekst aanpassen: pas na het langsvliegen van het logo ----------
+    function pasTekstAan() {
+      const gewenst = gewensteVerschuiving();
+      tekstvak.value = transponeer(tekstvak.value, gewenst - toegepast);
+      toegepast = gewenst;
+      tekstvak.classList.remove("verlicht");
+      void tekstvak.offsetWidth;
+      tekstvak.classList.add("verlicht");
+    }
+
+    // Plak je een nieuwe tekst over de oude heen (of begin je opnieuw), dan telt die weer als origineel
+    tekstvak.addEventListener("paste", function () {
+      if (tekstvak.selectionStart === 0 && tekstvak.selectionEnd === tekstvak.value.length) {
+        toegepast = 0;
+      }
+    });
+    tekstvak.addEventListener("input", function () {
+      if (tekstvak.value === "") toegepast = 0;
+    });
+
+    let vliegt = false;
+
+    okeKnop.addEventListener("click", function () {
+      if (vliegt) return;
+
+      // Wie liever geen animaties heeft, krijgt de tekst meteen aangepast
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        pasTekstAan();
+        pulseer();
+        return;
+      }
+
+      vliegt = true;
+      okeKnop.disabled = true;
+
+      // Een kopie van het logo vliegt van links naar rechts over het tekstvak
+      const vlieger = document.createElement("div");
+      vlieger.className = "vlieger";
+      vlieger.appendChild(logo.querySelector("svg").cloneNode(true));
+      const t0 = tekstvak.getBoundingClientRect();
+      vlieger.style.top = (t0.top + t0.height / 2 - 40) + "px";
+      document.body.appendChild(vlieger);
+
+      const breedte = window.innerWidth;
+      const animatie = vlieger.animate(
+        [
+          { transform: "translateX(-140px) rotate(0deg)" },
+          { transform: "translateX(" + (breedte + 140) + "px) rotate(720deg)" }
+        ],
+        { duration: 1900, easing: "ease-in-out", fill: "forwards" }
+      );
+
+      let aangepast = false;
+      let klaar = false;
+
+      // Zodra het logo helemaal voorbij het tekstvak is, wordt de tekst aangepast
+      function kijk() {
+        if (klaar) return;
+        const v = vlieger.getBoundingClientRect();
+        const t = tekstvak.getBoundingClientRect();
+        if (!aangepast && v.left > t.right) {
+          aangepast = true;
+          pasTekstAan();
+          pulseer();
+        }
+        requestAnimationFrame(kijk);
+      }
+      requestAnimationFrame(kijk);
+
+      animatie.onfinish = function () {
+        klaar = true;
+        if (!aangepast) { pasTekstAan(); pulseer(); }
+        vlieger.remove();
+        vliegt = false;
+        okeKnop.disabled = false;
+      };
+    });
+
+    // ---------- Klik op het logo: alles terug naar het begin ----------
+    logo.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (vliegt) return;
+      stand.orig = 0;
+      stand.nieuw = 0;
+      toegepast = 0;
+      tekstvak.value = "";
+      toon();
+      pulseer();
+      logo.classList.remove("draai");
+      void logo.offsetWidth;
+      logo.classList.add("draai");
     });
 
     // ---------- Versiering ----------
@@ -357,7 +564,7 @@ Dit lied gaat van A naar D en dan naar G.</textarea>
       eq.appendChild(balk);
     }
 
-    // Laat de equalizer even "springen" als je een toonhoogte verandert
+    // Laat de equalizer even "springen"
     function pulseer() {
       eq.classList.remove("boost");
       void eq.offsetWidth;
