@@ -6,7 +6,8 @@
   <title>KeyChanger</title>
 
   <style>
-    /* Achtergrondafbeelding:C:\Users\hosea\Downloads\Designer (1).png */
+    /* Achtergrondafbeelding: upload je plaatje in GitHub met de naam "achtergrond.png"
+       (naast dit bestand). Een pad zoals C:\Users\... werkt NIET op internet. */
     body {
       margin: 0;
       min-height: 100vh;
@@ -15,120 +16,182 @@
       justify-content: center;
       font-family: Arial, sans-serif;
       background-color: #1e3a5f;
-      background-image: url("  <style>
-    /* Achtergrondafbeelding:C:\Users\hosea\Downloads\Designer (1).png */
-    body {
-      margin: 0;");
+      background-image: url("achtergrond.png");
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
+      color: white;
+    }
+
+    /* ---------- Liquid glass ---------- */
+    .glass {
+      background: rgba(255, 255, 255, 0.16);
+      -webkit-backdrop-filter: blur(16px) saturate(170%);
+      backdrop-filter: blur(16px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.65),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+        0 10px 30px rgba(0, 0, 0, 0.28);
+      color: white;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
     }
 
     .kaart {
-      background: rgba(255, 255, 255, 0.92);
       padding: 24px;
-      border-radius: 12px;
-      width: min(600px, 90vw);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      border-radius: 28px;
+      width: min(640px, 92vw);
     }
 
     h1 { margin-top: 0; }
 
     textarea {
       width: 100%;
-      height: 140px;
-      padding: 10px;
+      height: 150px;
+      padding: 14px;
       font-size: 16px;
       box-sizing: border-box;
+      border-radius: 18px;
+      resize: vertical;
+      outline: none;
     }
 
-    .rij {
+    textarea:focus { border-color: rgba(255, 255, 255, 0.9); }
+
+    .keuzes {
       display: flex;
-      gap: 10px;
-      align-items: center;
-      margin: 12px 0;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 20px;
       flex-wrap: wrap;
     }
 
-    input[type="text"] {
-      width: 40px;
-      font-size: 18px;
-      text-align: center;
-      padding: 4px;
+    .toonhoogte {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
     }
 
-    button {
-      background: #2563eb;
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      font-size: 16px;
-      border-radius: 8px;
+    .toonhoogte .label { font-size: 14px; letter-spacing: 0.5px; }
+
+    .pijl, .letter {
       cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      font-family: inherit;
     }
 
-    button:hover { background: #1d4ed8; }
-    .grijs { background: #6b7280; }
-    .grijs:hover { background: #4b5563; }
+    .pijl {
+      width: 56px;
+      height: 32px;
+      border-radius: 16px;
+      font-size: 14px;
+    }
+
+    .letter {
+      width: 110px;
+      height: 80px;
+      border-radius: 26px;
+      font-size: 40px;
+      font-weight: bold;
+    }
+
+    .pijl:hover, .letter:hover { background: rgba(255, 255, 255, 0.28); }
+    .pijl:active, .letter:active { transform: scale(0.94); }
+    .letter:focus { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 3px; }
+
+    .tip { font-size: 13px; opacity: 0.85; text-align: center; margin: 16px 0 0; }
   </style>
 </head>
 
 <body>
-  <div class="kaart">
+  <div class="kaart glass">
     <h1>KeyChanger</h1>
-    <p>Typ of plak hier je tekst. Druk daarna op de knop (of op de toets <b>D</b>).</p>
 
-    <textarea id="tekst">Dit is een voorbeeldtekst met veel letters a. Alle a's worden straks veranderd!</textarea>
+    <textarea id="tekst" class="glass">Am   G   C   F
+Dit lied gaat van A naar D en dan naar G.</textarea>
 
-    <div class="rij">
-      Verander de letter
-      <input type="text" id="van" value="a" maxlength="1">
-      in
-      <input type="text" id="naar" value="d" maxlength="1">
+    <div class="keuzes">
+      <div class="toonhoogte">
+        <span class="label">Originele toonhoogte</span>
+        <button class="pijl glass" data-wie="orig" data-richting="1" aria-label="Originele toonhoogte omhoog">▲</button>
+        <button class="letter glass" id="orig">A</button>
+        <button class="pijl glass" data-wie="orig" data-richting="-1" aria-label="Originele toonhoogte omlaag">▼</button>
+      </div>
+
+      <div class="toonhoogte">
+        <span class="label">Nieuwe toonhoogte</span>
+        <button class="pijl glass" data-wie="nieuw" data-richting="1" aria-label="Nieuwe toonhoogte omhoog">▲</button>
+        <button class="letter glass" id="nieuw">A</button>
+        <button class="pijl glass" data-wie="nieuw" data-richting="-1" aria-label="Nieuwe toonhoogte omlaag">▼</button>
+      </div>
     </div>
 
-    <div class="rij">
-      <button id="knop">Verander letters</button>
-      <button id="reset" class="grijs">Terugzetten</button>
-    </div>
+    <p class="tip">Klik op een letter en gebruik dan de pijltjestoetsen ↑ en ↓ (of klik op ▲ ▼).</p>
   </div>
 
   <script>
-    // Haal de onderdelen van de pagina op, zodat we ze kunnen gebruiken
+    // Alle toonhoogtes in volgorde: C, C#, D, D#, E, F, F#, G, G#, A, A#, B
+    const noten = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    // Waar elke letter staat in die lijst (C = 0, D = 2, E = 4, F = 5, G = 7, A = 9, B = 11)
+    const basis = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
     const tekstvak = document.getElementById("tekst");
-    const van = document.getElementById("van");
-    const naar = document.getElementById("naar");
-    const knop = document.getElementById("knop");
-    const reset = document.getElementById("reset");
+    const origEl = document.getElementById("orig");
+    const nieuwEl = document.getElementById("nieuw");
 
-    // Onthoud de originele tekst voor de "Terugzetten" knop
-    const origineel = tekstvak.value;
+    // Positie in de lijst C..B (0 = C, 11 = B)
+    const stand = { orig: 0, nieuw: 0 };
 
-    function verander() {
-      const zoek = van.value;
-      const nieuw = naar.value;
-      if (zoek === "") return;
+    // De tekst zoals hij in de ORIGINELE toonhoogte is
+    let bron = tekstvak.value;
 
-      // "gi" = alle voorkomens (g) en hoofdletters/kleine letters (i)
-      const patroon = new RegExp(zoek, "gi");
-      tekstvak.value = tekstvak.value.replace(patroon, nieuw);
+    // Verschuift losse noten/akkoorden (zoals A, Dm, G7, C#, Bb, C/G) met een aantal halve tonen.
+    // Gewone woorden zoals "Dit" of "Ben" blijven met rust.
+    function transponeer(tekst, stappen) {
+      const s = ((stappen % 12) + 12) % 12;
+      if (s === 0) return tekst;
+      const patroon = /\b([A-G])([#b]?)(?=(?:m|maj|min|dim|aug|sus|add)?\d*(?:\/[A-G][#b]?)?(?![A-Za-z]))/g;
+      return tekst.replace(patroon, function (_, letter, teken) {
+        let plek = basis[letter] + (teken === "#" ? 1 : teken === "b" ? -1 : 0);
+        return noten[(((plek + s) % 12) + 12) % 12];
+      });
     }
 
-    // Klik op de knop
-    knop.addEventListener("click", verander);
+    function toon() {
+      origEl.textContent = noten[stand.orig];
+      nieuwEl.textContent = noten[stand.nieuw];
+      tekstvak.value = transponeer(bron, stand.nieuw - stand.orig);
+    }
 
-    // Terugzetten
-    reset.addEventListener("click", function () {
-      tekstvak.value = origineel;
+    // Een stap omhoog (+1) of omlaag (-1), van C tot B
+    function verplaats(wie, richting) {
+      stand[wie] = Math.min(11, Math.max(0, stand[wie] + richting));
+      toon();
+    }
+
+    // Als je zelf in het tekstvak typt, onthouden we de tekst in de originele toonhoogte
+    tekstvak.addEventListener("input", function () {
+      bron = transponeer(tekstvak.value, -(stand.nieuw - stand.orig));
     });
 
-    // Druk op de toets D (maar niet als je net in een vakje aan het typen bent)
-    document.addEventListener("keydown", function (e) {
-      const typtIn = ["TEXTAREA", "INPUT"].includes(document.activeElement.tagName);
-      if (!typtIn && e.key.toLowerCase() === "d") {
-        verander();
-      }
+    // Pijltjes-knoppen (▲ ▼)
+    document.querySelectorAll(".pijl").forEach(function (knop) {
+      knop.addEventListener("click", function () {
+        verplaats(knop.dataset.wie, Number(knop.dataset.richting));
+      });
     });
+
+    // Pijltjestoetsen op het toetsenbord als een letter-knop is aangeklikt
+    [origEl, nieuwEl].forEach(function (el) {
+      el.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+          e.preventDefault();
+          verplaats(el.id, e.key === "ArrowUp" ? 1 : -1);
+        }
+      });
+    });
+
+    toon();
   </script>
 </body>
 </html>
