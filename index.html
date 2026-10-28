@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KeyChanger</title>
 
-  <!-- Logo in het tabblad van de browser. Upload "logo.png" naast dit bestand. -->
-  <link rel="icon" type="image/png" href="logo.png">
+  <!-- Logo (muzieknoot) in het tabblad van de browser, zit in de code zelf: je hoeft niets te uploaden. -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%230b5ed7'/%3E%3Cstop offset='1' stop-color='%2334d399'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Cellipse cx='25' cy='45' rx='9' ry='7' transform='rotate(-20 25 45)' fill='white'/%3E%3Crect x='31' y='15' width='4.5' height='30' rx='2' fill='white'/%3E%3Cpath d='M35 15 C44 18 49 24 46 34 C45 28 41 25 35 24 Z' fill='white'/%3E%3C/svg%3E">
 
   <!-- Mooie lettertypes (gratis, werken direct op internet) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -97,18 +97,15 @@
       top: 16px;
       left: 16px;
       z-index: 5;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 16px 8px 10px;
-      border-radius: 999px;
-      color: #fff;
-      text-decoration: none;
-      font-family: var(--kop);
-      font-weight: 800;
-      font-size: 18px;
+      display: block;
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(0, 20, 60, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      transition: transform 0.2s;
     }
-    .merk img { height: 36px; width: auto; display: block; border-radius: 8px; }
+    .merk:hover { transform: scale(1.07) rotate(-4deg); }
+    .merk svg { width: 100%; height: 100%; display: block; }
 
     /* ---------- Kaart ---------- */
     .kaart {
@@ -228,9 +225,19 @@
   <div class="noten-regen" id="noten-regen" aria-hidden="true"></div>
 
   <!-- Logo links boven -->
-  <a class="merk glass" href="./">
-    <img src="logo.png" alt="" onerror="this.style.display='none'">
-    <span>KeyChanger</span>
+  <a class="merk" href="./" aria-label="KeyChanger" title="KeyChanger">
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+      <defs>
+        <linearGradient id="logo-verloop" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#0b5ed7"/>
+          <stop offset="1" stop-color="#34d399"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="16" fill="url(#logo-verloop)"/>
+      <ellipse cx="25" cy="45" rx="9" ry="7" transform="rotate(-20 25 45)" fill="#fff"/>
+      <rect x="31" y="15" width="4.5" height="30" rx="2" fill="#fff"/>
+      <path d="M35 15 C44 18 49 24 46 34 C45 28 41 25 35 24 Z" fill="#fff"/>
+    </svg>
   </a>
 
   <main class="kaart glass">
@@ -284,7 +291,8 @@ Dit lied gaat van A naar D en dan naar G.</textarea>
     // De tekst zoals hij in de ORIGINELE toonhoogte is
     let bron = tekstvak.value;
 
-    // Verschuift losse noten/akkoorden (A, Dm, G7, C#, Bb, C/G) met een aantal halve tonen.
+    // Zoekt alle akkoorden in de tekst (A, Dm, G7, C#, Bb, C/G) en schuift ze zoveel stappen op
+    // als de nieuwe toonhoogte verschilt van de originele: hoger = omhoog, lager = omlaag.
     // Gewone woorden zoals "Dit" of "Ben" blijven met rust.
     function transponeer(tekst, stappen) {
       const s = ((stappen % 12) + 12) % 12;
@@ -296,11 +304,11 @@ Dit lied gaat van A naar D en dan naar G.</textarea>
       });
     }
 
-    // Capo: nieuwe toonhoogte lager dan origineel -> 1, 2, 3, ...
+    // Capo: nieuwe toonhoogte hoger dan origineel -> 1, 2, 3, ...
     //       gelijk -> 12
-    //       hoger  -> 11, 10, 9, ...
+    //       lager  -> 11, 10, 9, ...
     function berekenCapo() {
-      const verschil = (((stand.orig - stand.nieuw) % 12) + 12) % 12;
+      const verschil = (((stand.nieuw - stand.orig) % 12) + 12) % 12;
       return verschil === 0 ? 12 : verschil;
     }
 
