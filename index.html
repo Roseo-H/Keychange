@@ -5,224 +5,255 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KeyChanger</title>
 
-  <!-- Logo in het tabblad van de browser (naast de titel). Upload "logo.png" naast dit bestand. -->
+  <!-- Logo in het tabblad van de browser. Upload "logo.png" naast dit bestand. -->
   <link rel="icon" type="image/png" href="logo.png">
 
-  <style>
-    /* Lettertype GLF Amar: upload je lettertypebestand in GitHub naast dit bestand
-       met de naam "GLF-Amar.ttf" (of pas hieronder de naam/het formaat aan, bv. .otf of .woff2). */
-    @font-face {
-      font-family: "GLF Amar";
-      src: local("GLF Amar"),
-           url("<!DOCTYPE html>
-<html lang="nl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KeyChanger</title>
-
-  <!-- Logo in het tabblad van de browser (naast de titel). Upload "logo.png" naast dit bestand. -->
-  <link rel="icon" type="image/png" href="logo.png">
+  <!-- Mooie lettertypes (gratis, werken direct op internet) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Sora:wght@600;800&display=swap" rel="stylesheet">
 
   <style>
-    /* Lettertype GLF Amar: upload je lettertypebestand in GitHub naast dit bestand
-       met de naam "GLF-Amar.ttf" (of pas hieronder de naam/het formaat aan, bv. .otf of .woff2). */
-    @font-face {
-      font-family: "GLF Amar";
-      src: local("GLF Amar"),
-           url("<!DOCTYPE html>
-<html lang="nl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KeyChanger</title>
-
-  <!-- Logo in het tabblad van de browser (naast de titel). Upload "logo.png" naast dit bestand. -->
-  <link rel="icon" type="image/png" href="logo.png">
-
-  <style>
-    /* Lettertype GLF Amar: upload je lettertypebestand in GitHub naast dit bestand
-       met de naam "GLF-Amar.ttf" (of pas hieronder de naam/het formaat aan, bv. .otf of .woff2). */
-    @font-face {
-      font-family: "GLF Amar";
-      src: local("GLF Amar"),
-           url("GLF-Amar.ttf") format("truetype"),
-           url("<!DOCTYPE html>
-<html lang="nl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KeyChanger</title>
-
-  <!-- Logo in het tabblad van de browser (naast de titel). Upload "logo.png" naast dit bestand. -->
-  <link rel="icon" type="image/png" href="logo.png">
-
-  <style>
-    /* Lettertype GLF Amar: upload je lettertypebestand in GitHub naast dit bestand
-       met de naam "GLF-Amar.ttf" (of pas hieronder de naam/het formaat aan, bv. .otf of .woff2). */
-    @font-face {
-      font-family: "GLF Amar";
-      src: local("GLF Amar"),
-           url("GLF-Amar.ttf") format("truetype"),
-           url("GLF-amara.TTF") format("truetype");
-      font-display: swap;
+    :root {
+      --kop: "Sora", "Segoe UI", Arial, sans-serif;
+      --tekst: "Outfit", "Segoe UI", Arial, sans-serif;
     }
 
-    /* Achtergrondafbeelding: upload je plaatje in GitHub met de naam "achtergrond.png"
-       (naast dit bestand). Een pad zoals C:\Users\... werkt NIET op internet. */
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: "GLF Amar", Arial, sans-serif;
-      background-color: #1e3a5f;
-      /* Eerst je eigen geüploade "achtergrond.png"; bestaat die niet, dan het plaatje van Vecteezy. */
-      background-image:
-        url("achtergrond.png"),
-        url("https://static.vecteezy.com/system/resources/previews/021/991/178/large_2x/colorful-music-notes-background-with-sheet-music-disc-and-treble-clef-illustration-ai-generative-free-photo.jpg");
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      color: white;
+      padding: 96px 16px 40px;
+      font-family: var(--tekst);
+      color: #fff;
+      overflow-x: hidden;
+      /* Blauw -> groen verloop dat rustig beweegt */
+      background: linear-gradient(135deg, #0a2a6b, #0b5ed7, #07b0a8, #2fd27a, #0b5ed7, #0a2a6b);
+      background-size: 400% 400%;
+      animation: verloop 22s ease-in-out infinite;
+    }
+
+    @keyframes verloop {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Zachte gloeiende bollen op de achtergrond */
+    .bol {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 0;
+      animation: zweef 16s ease-in-out infinite alternate;
+    }
+    .bol.een  { width: 380px; height: 380px; background: #38bdf8; top: -80px; left: -80px; }
+    .bol.twee { width: 420px; height: 420px; background: #34d399; bottom: -120px; right: -100px; animation-delay: -6s; }
+    .bol.drie { width: 260px; height: 260px; background: #22d3ee; top: 45%; left: 55%; animation-delay: -11s; }
+
+    @keyframes zweef {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(40px, -30px) scale(1.15); }
+    }
+
+    /* Zwevende muzieknootjes */
+    .noten-regen { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .noot {
+      position: absolute;
+      bottom: -60px;
+      color: rgba(255, 255, 255, 0.22);
+      animation: opstijgen linear infinite;
+    }
+    @keyframes opstijgen {
+      from { transform: translateY(0) rotate(0deg); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      to   { transform: translateY(-115vh) rotate(25deg); opacity: 0; }
     }
 
     /* ---------- Liquid glass ---------- */
     .glass {
-      background: rgba(255, 255, 255, 0.16);
-      -webkit-backdrop-filter: blur(16px) saturate(170%);
-      backdrop-filter: blur(16px) saturate(170%);
-      border: 1px solid rgba(255, 255, 255, 0.45);
+      background: rgba(255, 255, 255, 0.14);
+      -webkit-backdrop-filter: blur(18px) saturate(170%);
+      backdrop-filter: blur(18px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.4);
       box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.12),
-        0 10px 30px rgba(0, 0, 0, 0.28);
-      color: white;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+        0 12px 32px rgba(0, 20, 60, 0.3);
+      color: #fff;
+      text-shadow: 0 1px 4px rgba(0, 20, 60, 0.35);
     }
 
-    .kaart {
-      padding: 24px;
-      border-radius: 28px;
-      width: min(640px, 92vw);
-    }
-
-    h1 { margin-top: 0; }
-
-    textarea {
-      width: 100%;
-      height: 150px;
-      padding: 14px;
-      font-size: 16px;
-      font-family: inherit;
-      box-sizing: border-box;
-      border-radius: 18px;
-      resize: vertical;
-      outline: none;
-    }
-
-    textarea:focus { border-color: rgba(255, 255, 255, 0.9); }
-
-    .keuzes {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    .toonhoogte {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .toonhoogte .label { font-size: 14px; letter-spacing: 0.5px; }
-
-    .pijl, .letter {
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-      font-family: inherit;
-    }
-
-    .pijl {
-      width: 56px;
-      height: 32px;
-      border-radius: 16px;
-      font-size: 14px;
-    }
-
-    .letter {
-      width: 110px;
-      height: 80px;
-      border-radius: 26px;
-      font-size: 40px;
-      font-weight: bold;
-    }
-
-    .pijl:hover, .letter:hover { background: rgba(255, 255, 255, 0.28); }
-    .pijl:active, .letter:active { transform: scale(0.94); }
-    .letter:focus { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 3px; }
-
-    .capo {
-      margin: 20px auto 0;
-      width: fit-content;
-      min-width: 220px;
-      padding: 14px 28px;
-      border-radius: 22px;
-      text-align: center;
-    }
-
-    .capo .label { font-size: 14px; letter-spacing: 0.5px; display: block; }
-    .capo .getal { font-size: 36px; font-weight: bold; }
-
-    /* Logo links boven in de site */
+    /* ---------- Logo links boven ---------- */
     .merk {
       position: fixed;
       top: 16px;
       left: 16px;
+      z-index: 5;
       display: flex;
       align-items: center;
       gap: 10px;
-      color: white;
+      padding: 8px 16px 8px 10px;
+      border-radius: 999px;
+      color: #fff;
       text-decoration: none;
-      font-size: 20px;
-      font-weight: bold;
-      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+      font-family: var(--kop);
+      font-weight: 800;
+      font-size: 18px;
+    }
+    .merk img { height: 36px; width: auto; display: block; border-radius: 8px; }
+
+    /* ---------- Kaart ---------- */
+    .kaart {
+      position: relative;
+      z-index: 1;
+      width: min(660px, 100%);
+      padding: 28px;
+      border-radius: 32px;
     }
 
-    .merk img { height: 48px; width: auto; display: block; }
+    h1 {
+      margin: 0 0 4px;
+      font-family: var(--kop);
+      font-weight: 800;
+      font-size: clamp(30px, 6vw, 42px);
+      letter-spacing: -0.5px;
+    }
 
-    .tip { font-size: 13px; opacity: 0.85; text-align: center; margin: 16px 0 0; }
+    .ondertitel { margin: 0 0 18px; font-weight: 300; font-size: 17px; opacity: 0.92; }
+
+    /* Equalizer onder de titel */
+    .eq {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 34px;
+      margin-bottom: 18px;
+    }
+    .eq span {
+      flex: 1;
+      min-width: 3px;
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(to top, #38bdf8, #4ade80);
+      transform-origin: bottom;
+      transform: scaleY(0.25);
+      animation: eq 1.6s ease-in-out infinite;
+      opacity: 0.9;
+    }
+    @keyframes eq {
+      0%, 100% { transform: scaleY(0.2); }
+      50%      { transform: scaleY(0.6); }
+    }
+    .eq.boost span { animation: eqboost 0.6s ease-out; }
+    @keyframes eqboost {
+      0%   { transform: scaleY(1); }
+      100% { transform: scaleY(0.25); }
+    }
+
+    textarea {
+      width: 100%;
+      height: 170px;
+      padding: 16px;
+      font-size: 17px;
+      line-height: 1.5;
+      font-family: var(--tekst);
+      border-radius: 20px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea::placeholder { color: rgba(255, 255, 255, 0.6); }
+    textarea:focus {
+      border-color: rgba(255, 255, 255, 0.95);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 0 0 4px rgba(255, 255, 255, 0.15), 0 12px 32px rgba(0, 20, 60, 0.3);
+    }
+
+    /* ---------- Toonhoogte-knoppen ---------- */
+    .keuzes {
+      display: flex;
+      gap: 22px;
+      justify-content: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .toonhoogte { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .toonhoogte .label { font-size: 14px; letter-spacing: 0.6px; text-transform: uppercase; font-weight: 600; opacity: 0.95; }
+
+    .pijl, .letter {
+      cursor: pointer;
+      font-family: var(--kop);
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+    .pijl { width: 60px; height: 34px; border-radius: 17px; font-size: 14px; }
+    .letter { width: 130px; height: 88px; border-radius: 28px; font-size: 44px; font-weight: 800; }
+
+    .pijl:hover, .letter:hover { background: rgba(255, 255, 255, 0.28); }
+    .pijl:active, .letter:active { transform: scale(0.93); }
+    .letter:focus-visible, .pijl:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
+
+    /* ---------- Capo ---------- */
+    .capo {
+      margin: 24px auto 0;
+      width: fit-content;
+      min-width: 240px;
+      padding: 14px 32px;
+      border-radius: 24px;
+      text-align: center;
+    }
+    .capo .label { display: block; font-size: 14px; letter-spacing: 0.6px; text-transform: uppercase; font-weight: 600; }
+    .capo .getal { font-family: var(--kop); font-size: 44px; font-weight: 800; line-height: 1.1; }
+
+    .tip { margin: 20px 0 0; text-align: center; font-size: 14px; font-weight: 300; opacity: 0.9; }
+
+    @media (prefers-reduced-motion: reduce) {
+      body, .bol, .noot, .eq span { animation: none !important; }
+    }
   </style>
 </head>
 
 <body>
-  <a class="merk" href="./">
-    <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+  <!-- Achtergrond-decoratie -->
+  <div class="bol een"></div>
+  <div class="bol twee"></div>
+  <div class="bol drie"></div>
+  <div class="noten-regen" id="noten-regen" aria-hidden="true"></div>
+
+  <!-- Logo links boven -->
+  <a class="merk glass" href="./">
+    <img src="logo.png" alt="" onerror="this.style.display='none'">
     <span>KeyChanger</span>
   </a>
 
-  <div class="kaart glass">
+  <main class="kaart glass">
     <h1>KeyChanger</h1>
+    <p class="ondertitel">Zet je akkoorden in een andere toonsoort en zie meteen welke capo je nodig hebt.</p>
 
-    <textarea id="tekst" class="glass">Am   G   C   F
+    <div class="eq" id="eq" aria-hidden="true"></div>
+
+    <textarea id="tekst" class="glass" spellcheck="false" placeholder="Typ of plak hier je akkoorden of songtekst...">Am   G   C   F
 Dit lied gaat van A naar D en dan naar G.</textarea>
 
     <div class="keuzes">
       <div class="toonhoogte">
         <span class="label">Originele toonhoogte</span>
         <button class="pijl glass" data-wie="orig" data-richting="1" aria-label="Originele toonhoogte omhoog">▲</button>
-        <button class="letter glass" id="orig">A</button>
+        <button class="letter glass" id="orig" aria-live="polite">C</button>
         <button class="pijl glass" data-wie="orig" data-richting="-1" aria-label="Originele toonhoogte omlaag">▼</button>
       </div>
 
       <div class="toonhoogte">
         <span class="label">Nieuwe toonhoogte</span>
         <button class="pijl glass" data-wie="nieuw" data-richting="1" aria-label="Nieuwe toonhoogte omhoog">▲</button>
-        <button class="letter glass" id="nieuw">A</button>
+        <button class="letter glass" id="nieuw" aria-live="polite">C</button>
         <button class="pijl glass" data-wie="nieuw" data-richting="-1" aria-label="Nieuwe toonhoogte omlaag">▼</button>
       </div>
     </div>
@@ -232,58 +263,61 @@ Dit lied gaat van A naar D en dan naar G.</textarea>
       <span class="getal" id="capo">12</span>
     </div>
 
-    <p class="tip">Klik op een letter en gebruik dan de pijltjestoetsen ↑ en ↓ (of klik op ▲ ▼).</p>
-  </div>
+    <p class="tip">Klik op een letter en gebruik de pijltjestoetsen ↑ en ↓, of klik op ▲ ▼.</p>
+  </main>
 
   <script>
+    // ---------- Toonhoogtes ----------
     // Alle toonhoogtes in volgorde: C, C#, D, D#, E, F, F#, G, G#, A, A#, B
     const noten = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    // Waar elke letter staat in die lijst (C = 0, D = 2, E = 4, F = 5, G = 7, A = 9, B = 11)
+    // Waar elke letter staat in die lijst
     const basis = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
     const tekstvak = document.getElementById("tekst");
     const origEl = document.getElementById("orig");
     const nieuwEl = document.getElementById("nieuw");
+    const capoEl = document.getElementById("capo");
 
-    // Positie in de lijst C..B (0 = C, 11 = B)
+    // Positie in de lijst (0 = C ... 11 = B)
     const stand = { orig: 0, nieuw: 0 };
 
     // De tekst zoals hij in de ORIGINELE toonhoogte is
     let bron = tekstvak.value;
 
-    // Verschuift losse noten/akkoorden (zoals A, Dm, G7, C#, Bb, C/G) met een aantal halve tonen.
+    // Verschuift losse noten/akkoorden (A, Dm, G7, C#, Bb, C/G) met een aantal halve tonen.
     // Gewone woorden zoals "Dit" of "Ben" blijven met rust.
     function transponeer(tekst, stappen) {
       const s = ((stappen % 12) + 12) % 12;
       if (s === 0) return tekst;
       const patroon = /\b([A-G])([#b]?)(?=(?:m|maj|min|dim|aug|sus|add)?\d*(?:\/[A-G][#b]?)?(?![A-Za-z]))/g;
       return tekst.replace(patroon, function (_, letter, teken) {
-        let plek = basis[letter] + (teken === "#" ? 1 : teken === "b" ? -1 : 0);
+        const plek = basis[letter] + (teken === "#" ? 1 : teken === "b" ? -1 : 0);
         return noten[(((plek + s) % 12) + 12) % 12];
       });
     }
 
-    // Capo: nieuwe toonhoogte lager dan origineel -> 1, 2, 3, ... (hoeveel stappen lager)
+    // Capo: nieuwe toonhoogte lager dan origineel -> 1, 2, 3, ...
     //       gelijk -> 12
-    //       hoger -> 11, 10, 9, ... (hoe verder omhoog, hoe lager de capo)
+    //       hoger  -> 11, 10, 9, ...
     function berekenCapo() {
-      const verschil = ((stand.orig - stand.nieuw) % 12 + 12) % 12;
+      const verschil = (((stand.orig - stand.nieuw) % 12) + 12) % 12;
       return verschil === 0 ? 12 : verschil;
     }
 
     function toon() {
       origEl.textContent = noten[stand.orig];
       nieuwEl.textContent = noten[stand.nieuw];
-      document.getElementById("capo").textContent = berekenCapo();
+      capoEl.textContent = berekenCapo();
       tekstvak.value = transponeer(bron, stand.nieuw - stand.orig);
     }
 
-    // Een stap omhoog (+1) of omlaag (-1), van C tot B
     function verplaats(wie, richting) {
       stand[wie] = Math.min(11, Math.max(0, stand[wie] + richting));
       toon();
+      pulseer();
     }
 
-    // Als je zelf in het tekstvak typt, onthouden we de tekst in de originele toonhoogte
+    // Typ je zelf in het tekstvak, dan onthouden we de tekst in de originele toonhoogte
     tekstvak.addEventListener("input", function () {
       bron = transponeer(tekstvak.value, -(stand.nieuw - stand.orig));
     });
@@ -305,739 +339,36 @@ Dit lied gaat van A naar D en dan naar G.</textarea>
       });
     });
 
-    toon();
-  </script>
-</body>
-</html>") format("truetype");
-      font-display: swap;
+    // ---------- Versiering ----------
+    // Equalizer-balkjes
+    const eq = document.getElementById("eq");
+    for (let i = 0; i < 40; i++) {
+      const balk = document.createElement("span");
+      balk.style.animationDelay = (-Math.random() * 1.6).toFixed(2) + "s";
+      balk.style.animationDuration = (1 + Math.random() * 1.2).toFixed(2) + "s";
+      eq.appendChild(balk);
     }
 
-    /* Achtergrondafbeelding: upload je plaatje in GitHub met de naam "achtergrond.png"
-       (naast dit bestand). Een pad zoals C:\Users\... werkt NIET op internet. */
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: "GLF Amar", Arial, sans-serif;
-      background-color: #1e3a5f;
-      /* Eerst je eigen geüploade "achtergrond.png"; bestaat die niet, dan het plaatje van Vecteezy. */
-      background-image:
-        url("achtergrond.png"),
-        url("https://static.vecteezy.com/system/resources/previews/021/991/178/large_2x/colorful-music-notes-background-with-sheet-music-disc-and-treble-clef-illustration-ai-generative-free-photo.jpg");
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      color: white;
+    // Laat de equalizer even "springen" als je een toonhoogte verandert
+    function pulseer() {
+      eq.classList.remove("boost");
+      void eq.offsetWidth;
+      eq.classList.add("boost");
     }
 
-    /* ---------- Liquid glass ---------- */
-    .glass {
-      background: rgba(255, 255, 255, 0.16);
-      -webkit-backdrop-filter: blur(16px) saturate(170%);
-      backdrop-filter: blur(16px) saturate(170%);
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.12),
-        0 10px 30px rgba(0, 0, 0, 0.28);
-      color: white;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+    // Zwevende muzieknootjes
+    const regen = document.getElementById("noten-regen");
+    const tekens = ["♪", "♫", "♩", "♬"];
+    for (let i = 0; i < 16; i++) {
+      const n = document.createElement("span");
+      n.className = "noot";
+      n.textContent = tekens[i % tekens.length];
+      n.style.left = (Math.random() * 100).toFixed(1) + "%";
+      n.style.fontSize = (22 + Math.random() * 34).toFixed(0) + "px";
+      n.style.animationDuration = (14 + Math.random() * 16).toFixed(1) + "s";
+      n.style.animationDelay = (-Math.random() * 25).toFixed(1) + "s";
+      regen.appendChild(n);
     }
-
-    .kaart {
-      padding: 24px;
-      border-radius: 28px;
-      width: min(640px, 92vw);
-    }
-
-    h1 { margin-top: 0; }
-
-    textarea {
-      width: 100%;
-      height: 150px;
-      padding: 14px;
-      font-size: 16px;
-      font-family: inherit;
-      box-sizing: border-box;
-      border-radius: 18px;
-      resize: vertical;
-      outline: none;
-    }
-
-    textarea:focus { border-color: rgba(255, 255, 255, 0.9); }
-
-    .keuzes {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    .toonhoogte {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .toonhoogte .label { font-size: 14px; letter-spacing: 0.5px; }
-
-    .pijl, .letter {
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-      font-family: inherit;
-    }
-
-    .pijl {
-      width: 56px;
-      height: 32px;
-      border-radius: 16px;
-      font-size: 14px;
-    }
-
-    .letter {
-      width: 110px;
-      height: 80px;
-      border-radius: 26px;
-      font-size: 40px;
-      font-weight: bold;
-    }
-
-    .pijl:hover, .letter:hover { background: rgba(255, 255, 255, 0.28); }
-    .pijl:active, .letter:active { transform: scale(0.94); }
-    .letter:focus { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 3px; }
-
-    .capo {
-      margin: 20px auto 0;
-      width: fit-content;
-      min-width: 220px;
-      padding: 14px 28px;
-      border-radius: 22px;
-      text-align: center;
-    }
-
-    .capo .label { font-size: 14px; letter-spacing: 0.5px; display: block; }
-    .capo .getal { font-size: 36px; font-weight: bold; }
-
-    /* Logo links boven in de site */
-    .merk {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: white;
-      text-decoration: none;
-      font-size: 20px;
-      font-weight: bold;
-      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
-    }
-
-    .merk img { height: 48px; width: auto; display: block; }
-
-    .tip { font-size: 13px; opacity: 0.85; text-align: center; margin: 16px 0 0; }
-  </style>
-</head>
-
-<body>
-  <a class="merk" href="./">
-    <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-    <span>KeyChanger</span>
-  </a>
-
-  <div class="kaart glass">
-    <h1>KeyChanger</h1>
-
-    <textarea id="tekst" class="glass">Am   G   C   F
-Dit lied gaat van A naar D en dan naar G.</textarea>
-
-    <div class="keuzes">
-      <div class="toonhoogte">
-        <span class="label">Originele toonhoogte</span>
-        <button class="pijl glass" data-wie="orig" data-richting="1" aria-label="Originele toonhoogte omhoog">▲</button>
-        <button class="letter glass" id="orig">A</button>
-        <button class="pijl glass" data-wie="orig" data-richting="-1" aria-label="Originele toonhoogte omlaag">▼</button>
-      </div>
-
-      <div class="toonhoogte">
-        <span class="label">Nieuwe toonhoogte</span>
-        <button class="pijl glass" data-wie="nieuw" data-richting="1" aria-label="Nieuwe toonhoogte omhoog">▲</button>
-        <button class="letter glass" id="nieuw">A</button>
-        <button class="pijl glass" data-wie="nieuw" data-richting="-1" aria-label="Nieuwe toonhoogte omlaag">▼</button>
-      </div>
-    </div>
-
-    <div class="capo glass">
-      <span class="label">Capo</span>
-      <span class="getal" id="capo">12</span>
-    </div>
-
-    <p class="tip">Klik op een letter en gebruik dan de pijltjestoetsen ↑ en ↓ (of klik op ▲ ▼).</p>
-  </div>
-
-  <script>
-    // Alle toonhoogtes in volgorde: C, C#, D, D#, E, F, F#, G, G#, A, A#, B
-    const noten = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    // Waar elke letter staat in die lijst (C = 0, D = 2, E = 4, F = 5, G = 7, A = 9, B = 11)
-    const basis = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-    const tekstvak = document.getElementById("tekst");
-    const origEl = document.getElementById("orig");
-    const nieuwEl = document.getElementById("nieuw");
-
-    // Positie in de lijst C..B (0 = C, 11 = B)
-    const stand = { orig: 0, nieuw: 0 };
-
-    // De tekst zoals hij in de ORIGINELE toonhoogte is
-    let bron = tekstvak.value;
-
-    // Verschuift losse noten/akkoorden (zoals A, Dm, G7, C#, Bb, C/G) met een aantal halve tonen.
-    // Gewone woorden zoals "Dit" of "Ben" blijven met rust.
-    function transponeer(tekst, stappen) {
-      const s = ((stappen % 12) + 12) % 12;
-      if (s === 0) return tekst;
-      const patroon = /\b([A-G])([#b]?)(?=(?:m|maj|min|dim|aug|sus|add)?\d*(?:\/[A-G][#b]?)?(?![A-Za-z]))/g;
-      return tekst.replace(patroon, function (_, letter, teken) {
-        let plek = basis[letter] + (teken === "#" ? 1 : teken === "b" ? -1 : 0);
-        return noten[(((plek + s) % 12) + 12) % 12];
-      });
-    }
-
-    // Capo: nieuwe toonhoogte lager dan origineel -> 1, 2, 3, ... (hoeveel stappen lager)
-    //       gelijk -> 12
-    //       hoger -> 11, 10, 9, ... (hoe verder omhoog, hoe lager de capo)
-    function berekenCapo() {
-      const verschil = ((stand.orig - stand.nieuw) % 12 + 12) % 12;
-      return verschil === 0 ? 12 : verschil;
-    }
-
-    function toon() {
-      origEl.textContent = noten[stand.orig];
-      nieuwEl.textContent = noten[stand.nieuw];
-      document.getElementById("capo").textContent = berekenCapo();
-      tekstvak.value = transponeer(bron, stand.nieuw - stand.orig);
-    }
-
-    // Een stap omhoog (+1) of omlaag (-1), van C tot B
-    function verplaats(wie, richting) {
-      stand[wie] = Math.min(11, Math.max(0, stand[wie] + richting));
-      toon();
-    }
-
-    // Als je zelf in het tekstvak typt, onthouden we de tekst in de originele toonhoogte
-    tekstvak.addEventListener("input", function () {
-      bron = transponeer(tekstvak.value, -(stand.nieuw - stand.orig));
-    });
-
-    // Pijltjes-knoppen (▲ ▼)
-    document.querySelectorAll(".pijl").forEach(function (knop) {
-      knop.addEventListener("click", function () {
-        verplaats(knop.dataset.wie, Number(knop.dataset.richting));
-      });
-    });
-
-    // Pijltjestoetsen op het toetsenbord als een letter-knop is aangeklikt
-    [origEl, nieuwEl].forEach(function (el) {
-      el.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-          e.preventDefault();
-          verplaats(el.id, e.key === "ArrowUp" ? 1 : -1);
-        }
-      });
-    });
-
-    toon();
-  </script>
-</body>
-</html>") format("truetype"),
-           url("GLF-amara.TTF") format("truetype");
-      font-display: swap;
-    }
-
-    /* Achtergrondafbeelding: upload je plaatje in GitHub met de naam "achtergrond.png"
-       (naast dit bestand). Een pad zoals C:\Users\... werkt NIET op internet. */
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: "GLF Amar", Arial, sans-serif;
-      background-color: #1e3a5f;
-      /* Eerst je eigen geüploade "achtergrond.png"; bestaat die niet, dan het plaatje van Vecteezy. */
-      background-image:
-        url("achtergrond.png"),
-        url("https://static.vecteezy.com/system/resources/previews/021/991/178/large_2x/colorful-music-notes-background-with-sheet-music-disc-and-treble-clef-illustration-ai-generative-free-photo.jpg");
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      color: white;
-    }
-
-    /* ---------- Liquid glass ---------- */
-    .glass {
-      background: rgba(255, 255, 255, 0.16);
-      -webkit-backdrop-filter: blur(16px) saturate(170%);
-      backdrop-filter: blur(16px) saturate(170%);
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.12),
-        0 10px 30px rgba(0, 0, 0, 0.28);
-      color: white;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
-    }
-
-    .kaart {
-      padding: 24px;
-      border-radius: 28px;
-      width: min(640px, 92vw);
-    }
-
-    h1 { margin-top: 0; }
-
-    textarea {
-      width: 100%;
-      height: 150px;
-      padding: 14px;
-      font-size: 16px;
-      font-family: inherit;
-      box-sizing: border-box;
-      border-radius: 18px;
-      resize: vertical;
-      outline: none;
-    }
-
-    textarea:focus { border-color: rgba(255, 255, 255, 0.9); }
-
-    .keuzes {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    .toonhoogte {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .toonhoogte .label { font-size: 14px; letter-spacing: 0.5px; }
-
-    .pijl, .letter {
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-      font-family: inherit;
-    }
-
-    .pijl {
-      width: 56px;
-      height: 32px;
-      border-radius: 16px;
-      font-size: 14px;
-    }
-
-    .letter {
-      width: 110px;
-      height: 80px;
-      border-radius: 26px;
-      font-size: 40px;
-      font-weight: bold;
-    }
-
-    .pijl:hover, .letter:hover { background: rgba(255, 255, 255, 0.28); }
-    .pijl:active, .letter:active { transform: scale(0.94); }
-    .letter:focus { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 3px; }
-
-    .capo {
-      margin: 20px auto 0;
-      width: fit-content;
-      min-width: 220px;
-      padding: 14px 28px;
-      border-radius: 22px;
-      text-align: center;
-    }
-
-    .capo .label { font-size: 14px; letter-spacing: 0.5px; display: block; }
-    .capo .getal { font-size: 36px; font-weight: bold; }
-
-    /* Logo links boven in de site */
-    .merk {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: white;
-      text-decoration: none;
-      font-size: 20px;
-      font-weight: bold;
-      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
-    }
-
-    .merk img { height: 48px; width: auto; display: block; }
-
-    .tip { font-size: 13px; opacity: 0.85; text-align: center; margin: 16px 0 0; }
-  </style>
-</head>
-
-<body>
-  <a class="merk" href="./">
-    <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-    <span>KeyChanger</span>
-  </a>
-
-  <div class="kaart glass">
-    <h1>KeyChanger</h1>
-
-    <textarea id="tekst" class="glass">Am   G   C   F
-Dit lied gaat van A naar D en dan naar G.</textarea>
-
-    <div class="keuzes">
-      <div class="toonhoogte">
-        <span class="label">Originele toonhoogte</span>
-        <button class="pijl glass" data-wie="orig" data-richting="1" aria-label="Originele toonhoogte omhoog">▲</button>
-        <button class="letter glass" id="orig">A</button>
-        <button class="pijl glass" data-wie="orig" data-richting="-1" aria-label="Originele toonhoogte omlaag">▼</button>
-      </div>
-
-      <div class="toonhoogte">
-        <span class="label">Nieuwe toonhoogte</span>
-        <button class="pijl glass" data-wie="nieuw" data-richting="1" aria-label="Nieuwe toonhoogte omhoog">▲</button>
-        <button class="letter glass" id="nieuw">A</button>
-        <button class="pijl glass" data-wie="nieuw" data-richting="-1" aria-label="Nieuwe toonhoogte omlaag">▼</button>
-      </div>
-    </div>
-
-    <div class="capo glass">
-      <span class="label">Capo</span>
-      <span class="getal" id="capo">12</span>
-    </div>
-
-    <p class="tip">Klik op een letter en gebruik dan de pijltjestoetsen ↑ en ↓ (of klik op ▲ ▼).</p>
-  </div>
-
-  <script>
-    // Alle toonhoogtes in volgorde: C, C#, D, D#, E, F, F#, G, G#, A, A#, B
-    const noten = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    // Waar elke letter staat in die lijst (C = 0, D = 2, E = 4, F = 5, G = 7, A = 9, B = 11)
-    const basis = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-    const tekstvak = document.getElementById("tekst");
-    const origEl = document.getElementById("orig");
-    const nieuwEl = document.getElementById("nieuw");
-
-    // Positie in de lijst C..B (0 = C, 11 = B)
-    const stand = { orig: 0, nieuw: 0 };
-
-    // De tekst zoals hij in de ORIGINELE toonhoogte is
-    let bron = tekstvak.value;
-
-    // Verschuift losse noten/akkoorden (zoals A, Dm, G7, C#, Bb, C/G) met een aantal halve tonen.
-    // Gewone woorden zoals "Dit" of "Ben" blijven met rust.
-    function transponeer(tekst, stappen) {
-      const s = ((stappen % 12) + 12) % 12;
-      if (s === 0) return tekst;
-      const patroon = /\b([A-G])([#b]?)(?=(?:m|maj|min|dim|aug|sus|add)?\d*(?:\/[A-G][#b]?)?(?![A-Za-z]))/g;
-      return tekst.replace(patroon, function (_, letter, teken) {
-        let plek = basis[letter] + (teken === "#" ? 1 : teken === "b" ? -1 : 0);
-        return noten[(((plek + s) % 12) + 12) % 12];
-      });
-    }
-
-    // Capo: nieuwe toonhoogte lager dan origineel -> 1, 2, 3, ... (hoeveel stappen lager)
-    //       gelijk -> 12
-    //       hoger -> 11, 10, 9, ... (hoe verder omhoog, hoe lager de capo)
-    function berekenCapo() {
-      const verschil = ((stand.orig - stand.nieuw) % 12 + 12) % 12;
-      return verschil === 0 ? 12 : verschil;
-    }
-
-    function toon() {
-      origEl.textContent = noten[stand.orig];
-      nieuwEl.textContent = noten[stand.nieuw];
-      document.getElementById("capo").textContent = berekenCapo();
-      tekstvak.value = transponeer(bron, stand.nieuw - stand.orig);
-    }
-
-    // Een stap omhoog (+1) of omlaag (-1), van C tot B
-    function verplaats(wie, richting) {
-      stand[wie] = Math.min(11, Math.max(0, stand[wie] + richting));
-      toon();
-    }
-
-    // Als je zelf in het tekstvak typt, onthouden we de tekst in de originele toonhoogte
-    tekstvak.addEventListener("input", function () {
-      bron = transponeer(tekstvak.value, -(stand.nieuw - stand.orig));
-    });
-
-    // Pijltjes-knoppen (▲ ▼)
-    document.querySelectorAll(".pijl").forEach(function (knop) {
-      knop.addEventListener("click", function () {
-        verplaats(knop.dataset.wie, Number(knop.dataset.richting));
-      });
-    });
-
-    // Pijltjestoetsen op het toetsenbord als een letter-knop is aangeklikt
-    [origEl, nieuwEl].forEach(function (el) {
-      el.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-          e.preventDefault();
-          verplaats(el.id, e.key === "ArrowUp" ? 1 : -1);
-        }
-      });
-    });
-
-    toon();
-  </script>
-</body>
-</html>") format("truetype"),
-           url("GLF-amara.TTF") format("truetype");
-      font-display: swap;
-    }
-
-    /* Achtergrondafbeelding: upload je plaatje in GitHub met de naam "achtergrond.png"
-       (naast dit bestand). Een pad zoals C:\Users\... werkt NIET op internet. */
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: "GLF Amar", Arial, sans-serif;
-      background-color: #1e3a5f;
-      /* Eerst je eigen geüploade "achtergrond.png"; bestaat die niet, dan het plaatje van Vecteezy. */
-      background-image:
-        url("achtergrond.png"),
-        url("https://static.vecteezy.com/system/resources/previews/021/991/178/large_2x/colorful-music-notes-background-with-sheet-music-disc-and-treble-clef-illustration-ai-generative-free-photo.jpg");
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      color: white;
-    }
-
-    /* ---------- Liquid glass ---------- */
-    .glass {
-      background: rgba(255, 255, 255, 0.16);
-      -webkit-backdrop-filter: blur(16px) saturate(170%);
-      backdrop-filter: blur(16px) saturate(170%);
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.12),
-        0 10px 30px rgba(0, 0, 0, 0.28);
-      color: white;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
-    }
-
-    .kaart {
-      padding: 24px;
-      border-radius: 28px;
-      width: min(640px, 92vw);
-    }
-
-    h1 { margin-top: 0; }
-
-    textarea {
-      width: 100%;
-      height: 150px;
-      padding: 14px;
-      font-size: 16px;
-      font-family: inherit;
-      box-sizing: border-box;
-      border-radius: 18px;
-      resize: vertical;
-      outline: none;
-    }
-
-    textarea:focus { border-color: rgba(255, 255, 255, 0.9); }
-
-    .keuzes {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    .toonhoogte {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .toonhoogte .label { font-size: 14px; letter-spacing: 0.5px; }
-
-    .pijl, .letter {
-      cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
-      font-family: inherit;
-    }
-
-    .pijl {
-      width: 56px;
-      height: 32px;
-      border-radius: 16px;
-      font-size: 14px;
-    }
-
-    .letter {
-      width: 110px;
-      height: 80px;
-      border-radius: 26px;
-      font-size: 40px;
-      font-weight: bold;
-    }
-
-    .pijl:hover, .letter:hover { background: rgba(255, 255, 255, 0.28); }
-    .pijl:active, .letter:active { transform: scale(0.94); }
-    .letter:focus { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 3px; }
-
-    .capo {
-      margin: 20px auto 0;
-      width: fit-content;
-      min-width: 220px;
-      padding: 14px 28px;
-      border-radius: 22px;
-      text-align: center;
-    }
-
-    .capo .label { font-size: 14px; letter-spacing: 0.5px; display: block; }
-    .capo .getal { font-size: 36px; font-weight: bold; }
-
-    /* Logo links boven in de site */
-    .merk {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: white;
-      text-decoration: none;
-      font-size: 20px;
-      font-weight: bold;
-      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
-    }
-
-    .merk img { height: 48px; width: auto; display: block; }
-
-    .tip { font-size: 13px; opacity: 0.85; text-align: center; margin: 16px 0 0; }
-  </style>
-</head>
-
-<body>
-  <a class="merk" href="./">
-    <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-    <span>KeyChanger</span>
-  </a>
-
-  <div class="kaart glass">
-    <h1>KeyChanger</h1>
-
-    <textarea id="tekst" class="glass">Am   G   C   F
-Dit lied gaat van A naar D en dan naar G.</textarea>
-
-    <div class="keuzes">
-      <div class="toonhoogte">
-        <span class="label">Originele toonhoogte</span>
-        <button class="pijl glass" data-wie="orig" data-richting="1" aria-label="Originele toonhoogte omhoog">▲</button>
-        <button class="letter glass" id="orig">A</button>
-        <button class="pijl glass" data-wie="orig" data-richting="-1" aria-label="Originele toonhoogte omlaag">▼</button>
-      </div>
-
-      <div class="toonhoogte">
-        <span class="label">Nieuwe toonhoogte</span>
-        <button class="pijl glass" data-wie="nieuw" data-richting="1" aria-label="Nieuwe toonhoogte omhoog">▲</button>
-        <button class="letter glass" id="nieuw">A</button>
-        <button class="pijl glass" data-wie="nieuw" data-richting="-1" aria-label="Nieuwe toonhoogte omlaag">▼</button>
-      </div>
-    </div>
-
-    <div class="capo glass">
-      <span class="label">Capo</span>
-      <span class="getal" id="capo">12</span>
-    </div>
-
-    <p class="tip">Klik op een letter en gebruik dan de pijltjestoetsen ↑ en ↓ (of klik op ▲ ▼).</p>
-  </div>
-
-  <script>
-    // Alle toonhoogtes in volgorde: C, C#, D, D#, E, F, F#, G, G#, A, A#, B
-    const noten = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    // Waar elke letter staat in die lijst (C = 0, D = 2, E = 4, F = 5, G = 7, A = 9, B = 11)
-    const basis = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-    const tekstvak = document.getElementById("tekst");
-    const origEl = document.getElementById("orig");
-    const nieuwEl = document.getElementById("nieuw");
-
-    // Positie in de lijst C..B (0 = C, 11 = B)
-    const stand = { orig: 0, nieuw: 0 };
-
-    // De tekst zoals hij in de ORIGINELE toonhoogte is
-    let bron = tekstvak.value;
-
-    // Verschuift losse noten/akkoorden (zoals A, Dm, G7, C#, Bb, C/G) met een aantal halve tonen.
-    // Gewone woorden zoals "Dit" of "Ben" blijven met rust.
-    function transponeer(tekst, stappen) {
-      const s = ((stappen % 12) + 12) % 12;
-      if (s === 0) return tekst;
-      const patroon = /\b([A-G])([#b]?)(?=(?:m|maj|min|dim|aug|sus|add)?\d*(?:\/[A-G][#b]?)?(?![A-Za-z]))/g;
-      return tekst.replace(patroon, function (_, letter, teken) {
-        let plek = basis[letter] + (teken === "#" ? 1 : teken === "b" ? -1 : 0);
-        return noten[(((plek + s) % 12) + 12) % 12];
-      });
-    }
-
-    // Capo: nieuwe toonhoogte lager dan origineel -> 1, 2, 3, ... (hoeveel stappen lager)
-    //       gelijk -> 12
-    //       hoger -> 11, 10, 9, ... (hoe verder omhoog, hoe lager de capo)
-    function berekenCapo() {
-      const verschil = ((stand.orig - stand.nieuw) % 12 + 12) % 12;
-      return verschil === 0 ? 12 : verschil;
-    }
-
-    function toon() {
-      origEl.textContent = noten[stand.orig];
-      nieuwEl.textContent = noten[stand.nieuw];
-      document.getElementById("capo").textContent = berekenCapo();
-      tekstvak.value = transponeer(bron, stand.nieuw - stand.orig);
-    }
-
-    // Een stap omhoog (+1) of omlaag (-1), van C tot B
-    function verplaats(wie, richting) {
-      stand[wie] = Math.min(11, Math.max(0, stand[wie] + richting));
-      toon();
-    }
-
-    // Als je zelf in het tekstvak typt, onthouden we de tekst in de originele toonhoogte
-    tekstvak.addEventListener("input", function () {
-      bron = transponeer(tekstvak.value, -(stand.nieuw - stand.orig));
-    });
-
-    // Pijltjes-knoppen (▲ ▼)
-    document.querySelectorAll(".pijl").forEach(function (knop) {
-      knop.addEventListener("click", function () {
-        verplaats(knop.dataset.wie, Number(knop.dataset.richting));
-      });
-    });
-
-    // Pijltjestoetsen op het toetsenbord als een letter-knop is aangeklikt
-    [origEl, nieuwEl].forEach(function (el) {
-      el.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-          e.preventDefault();
-          verplaats(el.id, e.key === "ArrowUp" ? 1 : -1);
-        }
-      });
-    });
 
     toon();
   </script>
