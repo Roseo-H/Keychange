@@ -6,6 +6,14 @@
   <title>KeyChanger</title>
 
   <style>
+    /* Lettertype GLF Amar: upload je lettertypebestand in GitHub naast dit bestand
+       met de naam "GLF-Amar.ttf" (of pas hieronder de naam/het formaat aan, bv. .otf of .woff2). */
+    @font-face {
+      font-family: "GLF Amar";
+      src: local("GLF Amar"), url("GLF-Amar.ttf") format("truetype");
+      font-display: swap;
+    }
+
     /* Achtergrondafbeelding: upload je plaatje in GitHub met de naam "achtergrond.png"
        (naast dit bestand). Een pad zoals C:\Users\... werkt NIET op internet. */
     body {
@@ -14,7 +22,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: Arial, sans-serif;
+      font-family: "GLF Amar", Arial, sans-serif;
       background-color: #1e3a5f;
       background-image: url("achtergrond.png");
       background-size: cover;
@@ -50,6 +58,7 @@
       height: 150px;
       padding: 14px;
       font-size: 16px;
+      font-family: inherit;
       box-sizing: border-box;
       border-radius: 18px;
       resize: vertical;
@@ -93,12 +102,24 @@
       height: 80px;
       border-radius: 26px;
       font-size: 40px;
-      font-weight: bold;
+      font-weight: GLF-amara.TTF;
     }
 
     .pijl:hover, .letter:hover { background: rgba(255, 255, 255, 0.28); }
     .pijl:active, .letter:active { transform: scale(0.94); }
     .letter:focus { outline: 2px solid rgba(255, 255, 255, 0.9); outline-offset: 3px; }
+
+    .capo {
+      margin: 20px auto 0;
+      width: fit-content;
+      min-width: 220px;
+      padding: 14px 28px;
+      border-radius: 22px;
+      text-align: center;
+    }
+
+    .capo .label { font-size: 14px; letter-spacing: 0.5px; display: block; }
+    .capo .getal { font-size: 36px; font-weight: bold; }
 
     .tip { font-size: 13px; opacity: 0.85; text-align: center; margin: 16px 0 0; }
   </style>
@@ -125,6 +146,11 @@ Dit lied gaat van A naar D en dan naar G.</textarea>
         <button class="letter glass" id="nieuw">A</button>
         <button class="pijl glass" data-wie="nieuw" data-richting="-1" aria-label="Nieuwe toonhoogte omlaag">▼</button>
       </div>
+    </div>
+
+    <div class="capo glass">
+      <span class="label">Capo</span>
+      <span class="getal" id="capo">12</span>
     </div>
 
     <p class="tip">Klik op een letter en gebruik dan de pijltjestoetsen ↑ en ↓ (of klik op ▲ ▼).</p>
@@ -157,9 +183,18 @@ Dit lied gaat van A naar D en dan naar G.</textarea>
       });
     }
 
+    // Capo: nieuwe toonhoogte lager dan origineel -> 1, 2, 3, ... (hoeveel stappen lager)
+    //       gelijk -> 12
+    //       hoger -> 11, 10, 9, ... (hoe verder omhoog, hoe lager de capo)
+    function berekenCapo() {
+      const verschil = ((stand.orig - stand.nieuw) % 12 + 12) % 12;
+      return verschil === 0 ? 12 : verschil;
+    }
+
     function toon() {
       origEl.textContent = noten[stand.orig];
       nieuwEl.textContent = noten[stand.nieuw];
+      document.getElementById("capo").textContent = berekenCapo();
       tekstvak.value = transponeer(bron, stand.nieuw - stand.orig);
     }
 
