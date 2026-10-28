@@ -360,15 +360,30 @@
     // Hoeveel stappen de tekst al is opgeschoven (zodat een tweede keer Oké niet dubbel schuift)
     let toegepast = 0;
 
-    // Zoekt alle akkoorden in de tekst (A, Dm, G7, C#, Bb, C/G) en schuift ze op.
-    // Positief = omhoog, negatief = omlaag. Gewone woorden zoals "Dit" of "Ben" blijven met rust.
+    // Zoekt alle losse akkoorden in de tekst, met een hoofdletter of een kleine letter
+    // (A, a, Dm, dm, G7, C#, f#, Bb, C/G, c/g) en schuift ze op.
+    // Positief = omhoog, negatief = omlaag.
+    // Letters die in een woord zitten ("Dit", "Ben", "de", "e-mail") blijven met rust:
+    // een akkoord moet los staan, dus voor en na het akkoord mag geen letter of cijfer staan.
     function transponeer(tekst, stappen) {
       const s = ((stappen % 12) + 12) % 12;
       if (s === 0) return tekst;
-      const patroon = /\b([A-G])([#b]?)(?=(?:m|maj|min|dim|aug|sus|add)?\d*(?:\/[A-G][#b]?)?(?![A-Za-z]))/g;
-      return tekst.replace(patroon, function (_, letter, teken) {
-        const plek = basis[letter] + (teken === "#" ? 1 : teken === "b" ? -1 : 0);
-        return noten[(((plek + s) % 12) + 12) % 12];
+
+      //            1: wat ervoor staat     2: letter  3: # of b  4: m, 7, maj7, ...   5+6: basnoot na /
+      const patroon = /(^|[^A-Za-z0-9#'’_])([A-Ga-g])([#b]?)((?:maj|min|dim|aug|sus|add|m)?\d*)(?:\/([A-Ga-g])([#b]?))?(?![A-Za-z0-9#'’_]|-[a-z]{3,})/g;
+
+      // Schuift één noot op en houdt hoofdletter of kleine letter zoals het was
+      function verschuif(letter, teken) {
+        const isHoofdletter = letter === letter.toUpperCase();
+        const plek = basis[letter.toUpperCase()] + (teken === "#" ? 1 : teken === "b" ? -1 : 0);
+        const nieuw = noten[(((plek + s) % 12) + 12) % 12];
+        return isHoofdletter ? nieuw : nieuw.toLowerCase();
+      }
+
+      return tekst.replace(patroon, function (_, voor, letter, teken, uitbreiding, bas, basTeken) {
+        let uit = voor + verschuif(letter, teken) + uitbreiding;
+        if (bas) uit += "/" + verschuif(bas, basTeken);
+        return uit;
       });
     }
 
