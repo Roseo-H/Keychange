@@ -845,21 +845,25 @@ let vorigeNieuw = 0;
     // Capo: nieuwe toonhoogte hoger dan origineel -> 1, 2, 3, ...
     //       gelijk -> 12
     //       lager  -> 11, 10, 9, ...
-  function berekenCapo() {
-  const verschil = (((stand.nieuw - stand.orig) % 12) + 12) % 12;
+ function berekenCapo() {
 
-  return verschil === 0 ? 12 : verschil;
+  let verschil = stand.nieuw - stand.orig;
+
+  if (verschil === 0) return 12;
+
+  if (verschil > 0) {
+    return 12 - verschil;
+  }
+
+  return Math.abs(verschil);
 }
 
     // Is de nieuwe toonhoogte hoger? Dan gaan de akkoorden omlaag (en andersom).
-  
-function gewensteVerschuiving() {
-
-  const verschil =
-    (((stand.nieuw - stand.orig) % 12) + 12) % 12;
-
-  return -verschil;
+  function gewensteVerschuiving() {
+  return stand.nieuw - stand.orig;
 }
+  
+
     // Laat de letters en de capo zien
     function toon() {
       ["orig", "nieuw"].forEach(function (wie) {
