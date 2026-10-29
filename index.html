@@ -773,6 +773,8 @@
 
     // Hoeveel stappen de tekst al is opgeschoven (zodat een tweede keer Oké niet dubbel schuift)
     let toegepast = 0;
+    let vorigeOrig = 0;
+let vorigeNieuw = 0;
 
     // Shorter: staat de schakelaar aan, dan onthouden we de volledige akkoorden (om terug te kunnen zetten)
     // en de ingekorte tekst die we er zelf van gemaakt hebben
@@ -937,7 +939,17 @@ function gewensteVerschuiving() {
     maakWiel(document.getElementById("wiel-nieuw"), "nieuw");
 
     // ---------- Tekst aanpassen: pas na het langsvliegen van het logo ----------
-    function pasTekstAan() {
+ function pasTekstAan() {
+
+  // Alleen origineel veranderd?
+  if (
+    stand.orig !== vorigeOrig &&
+    stand.nieuw === vorigeNieuw
+  ) {
+    vorigeOrig = stand.orig;
+    vorigeNieuw = stand.nieuw;
+    return;
+  }
       const gewenst = gewensteVerschuiving();
       const stappen = gewenst - toegepast;
       // Heb je de ingekorte tekst zelf niet aangepast? Dan schuiven we de volledige versie mee, zodat Shorter uit nog klopt
@@ -954,6 +966,8 @@ function gewensteVerschuiving() {
       }
       tekstvak.value = nieuw;
       toegepast = gewenst;
+   vorigeOrig = stand.orig;
+vorigeNieuw = stand.nieuw;
       tekstvak.classList.remove("verlicht");
       void tekstvak.offsetWidth;
       tekstvak.classList.add("verlicht");
