@@ -827,14 +827,10 @@
     // Capo: nieuwe toonhoogte hoger dan origineel -> 1, 2, 3, ...
     //       gelijk -> 12
     //       lager  -> 11, 10, 9, ...
-   function berekenCapo() {
+  function berekenCapo() {
   const verschil = (((stand.nieuw - stand.orig) % 12) + 12) % 12;
 
-  // originele toonhoogte = altijd capo 12
-  if (verschil === 0) return 12;
-
-  // hoger = capo omlaag rekenen
-  return 12 - verschil;
+  return verschil === 0 ? 12 : verschil;
 }
 
     // Is de nieuwe toonhoogte hoger? Dan gaan de akkoorden omlaag (en andersom).
