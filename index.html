@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-
   <meta charset="UTF-8">
-    <style>
   <!-- viewport-fit=cover: de pagina gebruikt het hele scherm van een iPhone/iPad, de code houdt zelf rekening met de notch en de balk onderaan -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0b5ed7">
@@ -21,36 +19,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Sora:wght@600;800&display=swap" rel="stylesheet">
-.tekst-bewerk-knop{
-  display:none;
-}
 
-#zoomSlider{
-  display:none;
-}
-
-
-
-.tekstdoos.vol #zoomSlider{
-  display:block;
-  position:absolute;
-  top:130px;
-  right:22px;
-  height:180px;
-  z-index:500;
-}
-
-
-  <button class="tekst-vol-knop" id="tekstVol">
-  ...
-  </button>
-
-
-
-
- 
-
-    </style>
+  <style>
     :root {
       --kop: "Sora", "Segoe UI", Arial, sans-serif;
       --tekst: "Outfit", "Segoe UI", Arial, sans-serif;
@@ -727,24 +697,6 @@
         <svg class="ico-uit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3a2 2 0 0 0 2-2V3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M21 16h-3a2 2 0 0 0-2 2v3"/></svg>
       </button>
    </div>
-    <button
-  class="tekst-bewerk-knop"
-  id="tekstBewerk"
-  type="button"
-  title="Bewerken">
-
-✏️
-
-</button>
-
-<input
-  type="range"
-  id="zoomSlider"
-  min="16"
-  max="48"
-  value="20">
-   
-
 
 <button
   class="kopieer-knop glass"
