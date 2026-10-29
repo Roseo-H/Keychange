@@ -435,7 +435,7 @@
     body.tekst-vol { overflow: hidden; }
     /* Een element met "backdrop-filter" houdt alles daarbinnen vast aan zichzelf: even uit, zodat het tekstvak echt het hele scherm vult */
     body.tekst-vol .kaart { -webkit-backdrop-filter: none; backdrop-filter: none; }
-   
+    body.tekst-vol .merk, body.tekst-vol .vol-knop { visibility: hidden; }
 
     .tekstdoos.vol {
       position: fixed;
@@ -443,15 +443,12 @@
       z-index: 100;
       background: #fff;
     }
-   .tekstdoos.vol textarea {
-  resize: none;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.tekstdoos.vol textarea::-webkit-scrollbar {
-  display: none;
-}
+    .tekstdoos.vol textarea {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      resize: none;
       background: #fff;
       color: #111;
       caret-color: #0b5ed7;
@@ -464,7 +461,6 @@
       font-size: 20px;
       line-height: 1.6;
       padding:
-        
         calc(env(safe-area-inset-top, 0px) + 22px)
         calc(env(safe-area-inset-right, 0px) + 72px)
         calc(env(safe-area-inset-bottom, 0px) + 28px)
@@ -822,42 +818,33 @@
     // Am7b5 -> Am en C/G -> C (de basnoot na de schuine streep gaat ook weg).
     // Een kleine "m" (mineur) blijft staan, want Am en A zijn twee verschillende akkoorden.
     function verkort(tekst) {
-  return tekst.replace(
-    akkoordPatroon(),
-    function (_, voor, letter, teken, uitbreiding) {
-
-      const mineur =
-        /^m(?!aj)/.test(uitbreiding)
-          ? "m"
-          : "";
-
-      const nieuwAkkoord =
-        letter +
-        teken +
-        mineur;
-
-      const origineel =
-        letter +
-        teken +
-        uitbreiding;
-
-      const opvulling =
-        " ".repeat(
-          Math.max(
-            0,
-            origineel.length - nieuwAkkoord.length
-          )
-        );
-
-      return voor + nieuwAkkoord + opvulling;
+      return tekst.replace(akkoordPatroon(), function (_, voor, letter, teken, uitbreiding) {
+        const mineur = /^m(?!aj)/.test(uitbreiding) ? "m" : "";
+        return voor + letter + teken + mineur;
+      });
     }
-  );
-}
+
     // Capo: nieuwe toonhoogte hoger dan origineel -> 1, 2, 3, ...
     //       gelijk -> 12
     //       lager  -> 11, 10, 9, ...
-  function berekenCapo() {
-  return stand.nieuw === 0 ? 12 : stand.nieuw;
+   function berekenCapo() {
+  const verschil = (((stand.nieuw - stand.orig) % 12) + 12) % 12;
+
+  // originele toonhoogte = altijd capo 12
+  if (verschil === 0) return 12;
+
+  // hoger = capo omlaag rekenen
+  return 12 - verschil;
+}
+
+    // Is de nieuwe toonhoogte hoger? Dan gaan de akkoorden omlaag (en andersom).
+  
+function gewensteVerschuiving() {
+  const verschil = (((stand.nieuw - stand.orig) % 12) + 12) % 12;
+
+  if (verschil === 0) return 0;
+
+  return -(12 - verschil);
 }
     // Laat de letters en de capo zien
     function toon() {
