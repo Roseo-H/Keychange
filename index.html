@@ -692,7 +692,41 @@
 
     <div class="tekstdoos" id="tekstdoos">
       <textarea id="tekst" class="glass" spellcheck="false" autocomplete="off" placeholder="Typ of plak hier je akkoorden of songtekst..."></textarea>
-      <button class="tekst-vol-knop glass" id="tekstVol" type="button" aria-label="Tekstvak over het hele scherm" title="Tekstvak over het hele scherm">
+      <button class="tekst-vol-knop glass" id="tekstVol" <button
+  class="tekst-bewerk-knop"
+  id="tekstBewerk"
+  type="button"
+  title="Bewerken">
+
+✏️
+
+</button>
+      .tekst-bewerk-knop{
+  display:none;
+}
+
+.tekstdoos.vol .tekst-bewerk-knop{
+  position:absolute;
+  top:70px;
+  right:14px;
+  width:44px;
+  height:44px;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  border:none;
+  border-radius:12px;
+
+  background:#eef2f7;
+  color:#111;
+
+  z-index:300;
+  cursor:pointer;
+
+  font-size:22px;
+}type="button" aria-label="Tekstvak over het hele scherm" title="Tekstvak over het hele scherm">
         <svg class="ico-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
         <svg class="ico-uit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3a2 2 0 0 0 2-2V3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M21 16h-3a2 2 0 0 0-2 2v3"/></svg>
       </button>
