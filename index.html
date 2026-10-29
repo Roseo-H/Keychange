@@ -786,9 +786,10 @@ let vorigeNieuw = 0;
     //   1: wat ervoor staat   2: letter A-G (hoofdletter of kleine letter)   3: # of b
     //   4: alles achter het akkoord (m, 7, maj7, sus4, add9, dim, aug, m7b5, 7(b9), ...)
     //   5+6: de basnoot na een schuine streep (C/G)
-    function akkoordPatroon() {
-      return /(^\|[^A-Za-z0-9#'’\_])([A-Ga-g])([#b]?)((?:(?:maj|min|dim|aug|sus|add|m|\d|[#b](?=\d)|[+°ø])*)(?:\([^()\s]{1,8}\))?)(?:\/([A-Ga-g])([#b]?))?(?![A-Za-z0-9#'’_]|-[a-z]{3,})/g;
-    }
+  function akkoordPatroon() {
+  return /(^|[^A-Za-z0-9#'’_])([A-Ga-g])([#b]?)((?:(?:maj|min|dim|aug|sus|add|m|\d|[#b](?=\d)|[+°ø])*)(?:\([^()\s]{1,8}\))?)(?:\/([A-Ga-g])([#b]?))?(?![A-Za-z0-9#'’_]|-[a-z]{3,})/g;
+}
+     
 
     // Zoekt alle losse akkoorden in de tekst, met een hoofdletter of een kleine letter
     // (A, a, Dm, dm, G7, C#, f#, Bb, C/G, c/g) en schuift ze op.
