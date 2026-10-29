@@ -552,7 +552,21 @@
       transition: opacity 0.3s, transform 0.3s;
     }
     .melding.zichtbaar { opacity: 1; transform: translate(-50%, 0); }
+.kopieer-knop{
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  border-radius:16px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+}
 
+.kopieer-knop svg{
+  width:22px;
+  height:22px;
+}
     /* ---------- Telefoon (smal scherm) ---------- */
     @media (max-width: 520px) {
       body {
@@ -1227,7 +1241,22 @@ function gewensteVerschuiving() {
     }
     document.addEventListener("fullscreenchange", fsGewijzigd);
     document.addEventListener("webkitfullscreenchange", fsGewijzigd);
+document
+  .getElementById("kopieerKnop")
+  .addEventListener("click", async function () {
 
+    try {
+      await navigator.clipboard.writeText(tekstvak.value);
+
+      toonMelding("Tekst gekopieerd!");
+
+    } catch (fout) {
+
+      toonMelding("Kopiëren mislukt.");
+
+    }
+
+  });
     toon();
   </script>
 </body>
