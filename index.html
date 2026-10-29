@@ -824,12 +824,37 @@
     // Am7b5 -> Am en C/G -> C (de basnoot na de schuine streep gaat ook weg).
     // Een kleine "m" (mineur) blijft staan, want Am en A zijn twee verschillende akkoorden.
     function verkort(tekst) {
-      return tekst.replace(akkoordPatroon(), function (_, voor, letter, teken, uitbreiding) {
-        const mineur = /^m(?!aj)/.test(uitbreiding) ? "m" : "";
-        return voor + letter + teken + mineur;
-      });
-    }
+  return tekst.replace(
+    akkoordPatroon(),
+    function (_, voor, letter, teken, uitbreiding) {
 
+      const mineur =
+        /^m(?!aj)/.test(uitbreiding)
+          ? "m"
+          : "";
+
+      const nieuwAkkoord =
+        letter +
+        teken +
+        mineur;
+
+      const origineel =
+        letter +
+        teken +
+        uitbreiding;
+
+      const opvulling =
+        " ".repeat(
+          Math.max(
+            0,
+            origineel.length - nieuwAkkoord.length
+          )
+        );
+
+      return voor + nieuwAkkoord + opvulling;
+    }
+  );
+}
     // Capo: nieuwe toonhoogte hoger dan origineel -> 1, 2, 3, ...
     //       gelijk -> 12
     //       lager  -> 11, 10, 9, ...
