@@ -2,7 +2,14 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- viewport-fit=cover: de pagina gebruikt het hele scherm van een iPhone/iPad, de code houdt zelf rekening met de notch en de balk onderaan -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b5ed7">
+  <!-- Zet je de site via "Zet op beginscherm" op je iPhone/iPad of Android, dan opent hij helemaal schermvullend (zonder browserbalk) -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KeyChanger">
   <title>KeyChanger</title>
 
   <!-- Logo (muzieknoot) in het tabblad van de browser, zit in de code zelf: je hoeft niets te uploaden. -->
@@ -21,13 +28,22 @@
 
     * { box-sizing: border-box; }
 
+    /* Voorkomt dat iPhone/iPad de letters groter maakt als je het scherm draait */
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
     body {
       margin: 0;
       min-height: 100vh;
+      min-height: 100dvh;           /* dvh = het echte zichtbare scherm op een telefoon (zonder de adresbalk) */
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 96px 16px 40px;
+      /* boven ruimte voor het logo; alle randen houden rekening met de notch van iPhone/iPad */
+      padding:
+        calc(env(safe-area-inset-top, 0px) + 92px)
+        calc(env(safe-area-inset-right, 0px) + 16px)
+        calc(env(safe-area-inset-bottom, 0px) + 40px)
+        calc(env(safe-area-inset-left, 0px) + 16px);
       font-family: var(--tekst);
       color: #fff;
       overflow-x: hidden;
@@ -63,7 +79,7 @@
     }
 
     /* Zwevende muzieknootjes */
-    .noten-regen { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .noten-regen { position: fixed; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; z-index: 0; overflow: hidden; }
     .noot {
       position: absolute;
       bottom: -60px;
@@ -93,10 +109,11 @@
 
     /* ---------- Logo links boven ---------- */
     .merk {
-      position: fixed;
-      top: 16px;
-      left: 16px;
+      position: absolute;           /* scrolt mee, zodat het logo nooit over de inhoud heen valt op een klein scherm */
+      top: calc(env(safe-area-inset-top, 0px) + 16px);
+      left: calc(env(safe-area-inset-left, 0px) + 16px);
       z-index: 5;
+      touch-action: manipulation;
       display: block;
       width: 56px;
       height: 56px;
@@ -105,7 +122,7 @@
       transition: transform 0.2s;
       -webkit-tap-highlight-color: transparent;
     }
-    .merk:hover { transform: scale(1.07) rotate(-4deg); }
+    @media (hover: hover) { .merk:hover { transform: scale(1.07) rotate(-4deg); } }
     .merk svg { width: 100%; height: 100%; display: block; }
     .merk.draai { animation: draai 0.7s ease; }
     @keyframes draai { to { transform: rotate(360deg); } }
@@ -195,20 +212,41 @@
     }
 
     /* ---------- Toonhoogte-wielen (slepen of vegen) ---------- */
+    /* De twee wielen blijven op elk scherm naast elkaar en krimpen mee */
     .keuzes {
       display: flex;
-      gap: 22px;
+      gap: clamp(10px, 3vw, 22px);
       justify-content: center;
       margin-top: 24px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
-    .toonhoogte { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .toonhoogte .label { font-size: 14px; letter-spacing: 0.6px; text-transform: uppercase; font-weight: 600; opacity: 0.95; }
+    .toonhoogte {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 190px;
+    }
+    .toonhoogte .label {
+      font-size: 14px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      font-weight: 600;
+      opacity: 0.95;
+      text-align: center;
+      min-height: 2.4em;            /* zo staan beide wielen op dezelfde hoogte, ook als een label op 2 regels staat */
+      display: flex;
+      align-items: flex-end;
+    }
 
     .wiel {
-      width: 140px;
+      width: 100%;
+      max-width: 160px;
       height: 156px;
+      -webkit-touch-callout: none;
       border-radius: 32px;
       display: flex;
       flex-direction: column;
@@ -221,7 +259,7 @@
       outline: none;
       transition: background 0.2s, transform 0.15s;
     }
-    .wiel:hover { background: rgba(255, 255, 255, 0.22); }
+    @media (hover: hover) { .wiel:hover { background: rgba(255, 255, 255, 0.22); } }
     .wiel.sleept { cursor: grabbing; background: rgba(255, 255, 255, 0.3); transform: scale(1.03); }
     .wiel:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
 
@@ -267,26 +305,354 @@
       cursor: pointer;
       transition: background 0.2s, transform 0.15s, opacity 0.2s;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;   /* geen dubbeltik-zoom op de knop */
+      min-height: 52px;             /* ruim genoeg om met een duim te raken */
     }
-    .oke:hover { background: rgba(255, 255, 255, 0.3); }
+    @media (hover: hover) { .oke:hover { background: rgba(255, 255, 255, 0.3); } }
     .oke:active { transform: scale(0.97); }
     .oke:disabled { opacity: 0.55; cursor: default; }
     .oke:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
 
     .tip { margin: 18px 0 0; text-align: center; font-size: 14px; font-weight: 300; opacity: 0.9; }
 
+    /* ---------- Startscherm ---------- */
+    body.start { overflow: hidden; height: 100vh; height: 100dvh; }
+    body.start .kaart, body.start .merk { display: none; }
+    /* Als je het startscherm weg klikt, zweeft de kaart zacht naar binnen */
+    body:not(.start) .kaart { animation: verschijn 0.6s ease backwards; }
+    @keyframes verschijn { from { opacity: 0; transform: translateY(14px) scale(0.98); } }
+
+    .home {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(12px, 3vh, 26px);
+      padding:
+        calc(env(safe-area-inset-top, 0px) + 24px)
+        calc(env(safe-area-inset-right, 0px) + 24px)
+        calc(env(safe-area-inset-bottom, 0px) + 24px)
+        calc(env(safe-area-inset-left, 0px) + 24px);
+      text-align: center;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .home[hidden] { display: none; }
+    .home.weg { opacity: 0; transform: scale(1.05); pointer-events: none; }
+
+    .home-logo {
+      width: clamp(150px, 42vmin, 280px);
+      aspect-ratio: 1 / 1;
+      padding: 0;
+      border: 0;
+      background: none;
+      border-radius: 25%;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      filter: drop-shadow(0 26px 46px rgba(0, 20, 60, 0.5));
+      animation: zweven 5s ease-in-out infinite;
+      transition: transform 0.25s ease;
+    }
+    .home-logo svg { width: 100%; height: 100%; display: block; }
+    @media (hover: hover) { .home-logo:hover { transform: scale(1.06) rotate(-3deg); } }
+    .home-logo:active { transform: scale(0.95); }
+    .home-logo:focus-visible { outline: 4px solid rgba(255, 255, 255, 0.95); outline-offset: 8px; }
+    @keyframes zweven { 0%, 100% { translate: 0 0; } 50% { translate: 0 -14px; } }
+
+    .home-naam {
+      margin: 0;
+      font-family: var(--kop);
+      font-weight: 800;
+      font-size: clamp(32px, min(9vw, 11vh), 68px);
+      letter-spacing: -1px;
+      text-shadow: 0 4px 24px rgba(0, 20, 60, 0.4);
+    }
+    .home-tip {
+      margin: 0;
+      font-weight: 300;
+      font-size: clamp(15px, 2.4vw, 19px);
+      animation: knipper 2.6s ease-in-out infinite;
+    }
+    @keyframes knipper { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+
+    /* ---------- Knop rechtsboven: volledig scherm aan/uit ---------- */
+    .vol-knop {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 16px);
+      right: calc(env(safe-area-inset-right, 0px) + 16px);
+      z-index: 30;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .vol-knop[hidden] { display: none; }
+    .vol-knop svg { width: 24px; height: 24px; display: block; }
+    .vol-knop .ico-uit { display: none; }
+    .vol-knop.is-vol .ico-in { display: none; }
+    .vol-knop.is-vol .ico-uit { display: block; }
+    @media (hover: hover) { .vol-knop:hover { background: rgba(255, 255, 255, 0.28); } }
+    .vol-knop:active { transform: scale(0.92); }
+    .vol-knop:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
+
+    /* ---------- Tekstvak met eigen volledig-scherm-knop ---------- */
+    .tekstdoos { position: relative; }
+    .tekstdoos textarea { display: block; padding-right: 56px; }
+
+    .tekst-vol-knop {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .tekst-vol-knop svg { width: 18px; height: 18px; display: block; }
+    .tekst-vol-knop .ico-uit { display: none; }
+    .tekstdoos.vol .tekst-vol-knop .ico-in { display: none; }
+    .tekstdoos.vol .tekst-vol-knop .ico-uit { display: block; }
+    @media (hover: hover) { .tekst-vol-knop:hover { background: rgba(255, 255, 255, 0.28); } }
+    .tekst-vol-knop:active { transform: scale(0.92); }
+    .tekst-vol-knop:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 2px; }
+
+    /* Tekstvak over het hele scherm: wit met zwarte letters */
+    body.tekst-vol { overflow: hidden; }
+    /* Een element met "backdrop-filter" houdt alles daarbinnen vast aan zichzelf: even uit, zodat het tekstvak echt het hele scherm vult */
+    body.tekst-vol .kaart { -webkit-backdrop-filter: none; backdrop-filter: none; }
+    body.tekst-vol .merk, body.tekst-vol .vol-knop { visibility: hidden; }
+
+    .tekstdoos.vol {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      z-index: 100;
+      background: #fff;
+    }
+    .tekstdoos.vol textarea {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      resize: none;
+      background: #fff;
+      color: #111;
+      caret-color: #0b5ed7;
+      text-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      font-size: 20px;
+      line-height: 1.6;
+      padding:
+        calc(env(safe-area-inset-top, 0px) + 22px)
+        calc(env(safe-area-inset-right, 0px) + 72px)
+        calc(env(safe-area-inset-bottom, 0px) + 28px)
+        calc(env(safe-area-inset-left, 0px) + 22px);
+    }
+    .tekstdoos.vol textarea:focus { box-shadow: none; border: 0; }
+    .tekstdoos.vol textarea::placeholder { color: #8a94a6; }
+    .tekstdoos.vol .tekst-vol-knop {
+      top: calc(env(safe-area-inset-top, 0px) + 14px);
+      right: calc(env(safe-area-inset-right, 0px) + 14px);
+      width: 44px;
+      height: 44px;
+      background: #eef2f7;
+      color: #111;
+      border: 1px solid #cfd8e3;
+      box-shadow: none;
+      text-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    .tekstdoos.vol .tekst-vol-knop svg { width: 22px; height: 22px; }
+
+    /* ---------- Shorter-schakelaar naast Oké ---------- */
+    .acties { display: flex; gap: 12px; margin-top: 24px; align-items: stretch; }
+    .acties .oke { margin-top: 0; width: auto; flex: 1 1 auto; min-width: 0; }
+
+    .schakel {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px 0 20px;
+      min-height: 52px;
+      border-radius: 24px;
+      font-family: var(--kop);
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      flex: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: background 0.2s, transform 0.15s;
+    }
+    @media (hover: hover) { .schakel:hover { background: rgba(255, 255, 255, 0.28); } }
+    .schakel:active { transform: scale(0.96); }
+    .schakel:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
+
+    .schakel-spoor {
+      position: relative;
+      flex: none;
+      width: 46px;
+      height: 28px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .schakel-bol {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0, 20, 60, 0.35);
+      transition: transform 0.22s cubic-bezier(0.3, 1.4, 0.5, 1);
+    }
+    .schakel[aria-checked="true"] .schakel-spoor {
+      background: linear-gradient(135deg, #38bdf8, #4ade80);
+      border-color: rgba(255, 255, 255, 0.9);
+    }
+    .schakel[aria-checked="true"] .schakel-bol { transform: translateX(18px); }
+
+    /* Kort berichtje onderin (bijvoorbeeld als de akkoorden niet terug te zetten zijn) */
+    .melding {
+      position: fixed;
+      left: 50%;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+      z-index: 80;
+      max-width: min(92vw, 460px);
+      padding: 12px 18px;
+      border-radius: 18px;
+      font-size: 15px;
+      text-align: center;
+      opacity: 0;
+      transform: translate(-50%, 20px);
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .melding.zichtbaar { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ---------- Telefoon (smal scherm) ---------- */
+    @media (max-width: 520px) {
+      body {
+        padding:
+          calc(env(safe-area-inset-top, 0px) + 76px)
+          calc(env(safe-area-inset-right, 0px) + 12px)
+          calc(env(safe-area-inset-bottom, 0px) + 28px)
+          calc(env(safe-area-inset-left, 0px) + 12px);
+      }
+      .merk {
+        top: calc(env(safe-area-inset-top, 0px) + 12px);
+        left: calc(env(safe-area-inset-left, 0px) + 12px);
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+      }
+      /* Minder zwaar voor een telefoon: lichtere vervaging */
+      .glass { -webkit-backdrop-filter: blur(12px) saturate(160%); backdrop-filter: blur(12px) saturate(160%); }
+      .bol { filter: blur(50px); }
+
+      .kaart { padding: 20px 16px; border-radius: 26px; }
+      .ondertitel { font-size: 15px; margin-bottom: 14px; }
+      .eq { height: 28px; margin-bottom: 14px; }
+      textarea { height: 150px; padding: 14px; }      /* lettergrootte blijft 17px: kleiner laat iPhone inzoomen */
+
+      .keuzes { margin-top: 18px; }
+      .toonhoogte .label { font-size: 11px; letter-spacing: 0.4px; }
+      .wiel { height: 132px; border-radius: 26px; }
+      .wiel .buur { font-size: 16px; height: 26px; line-height: 26px; }
+      .wiel .groot { font-size: 40px; height: 60px; line-height: 60px; }
+
+      .capo { min-width: 0; width: 100%; padding: 12px 20px; margin-top: 18px; }
+      .capo .getal { font-size: 38px; }
+      .oke { margin-top: 18px; font-size: 20px; }
+      .tip { font-size: 13px; }
+      .vlieger { width: 64px; height: 64px; }
+
+      .vol-knop { top: calc(env(safe-area-inset-top, 0px) + 12px); right: calc(env(safe-area-inset-right, 0px) + 12px); }
+      .acties { margin-top: 18px; gap: 10px; }
+      .schakel { padding: 0 12px 0 14px; gap: 8px; font-size: 14px; }
+      .schakel-spoor { width: 40px; height: 24px; }
+      .schakel-bol { width: 18px; height: 18px; }
+      .schakel[aria-checked="true"] .schakel-bol { transform: translateX(16px); }
+    }
+
+    /* ---------- Tablet / iPad ---------- */
+    @media (min-width: 700px) {
+      .kaart { width: min(720px, 100%); padding: 36px; }
+      textarea { height: 210px; font-size: 18px; }
+      .wiel { max-width: 170px; height: 168px; }
+    }
+
+    /* ---------- Telefoon of tablet liggend (weinig hoogte) ---------- */
+    @media (max-height: 520px) and (orientation: landscape) {
+      body { align-items: flex-start; }
+      .eq { display: none; }
+      .ondertitel { margin-bottom: 12px; }
+      textarea { height: 110px; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      body, .bol, .noot, .eq span { animation: none !important; }
+      body, .bol, .noot, .eq span, .home-logo, .home-tip, .kaart { animation: none !important; }
     }
   </style>
 </head>
 
-<body>
+<body class="start">
   <!-- Achtergrond-decoratie -->
   <div class="bol een"></div>
   <div class="bol twee"></div>
   <div class="bol drie"></div>
   <div class="noten-regen" id="noten-regen" aria-hidden="true"></div>
+
+  <!-- Startscherm: groot logo met de naam. Klik op het logo om naar de site te gaan -->
+  <section class="home" id="home" aria-label="Startscherm">
+    <button class="home-logo" id="startLogo" type="button" aria-label="Start KeyChanger">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="logo-groot" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#0b5ed7"/>
+            <stop offset="1" stop-color="#34d399"/>
+          </linearGradient>
+        </defs>
+        <rect width="64" height="64" rx="16" fill="url(#logo-groot)"/>
+        <ellipse cx="25" cy="45" rx="9" ry="7" transform="rotate(-20 25 45)" fill="#fff"/>
+        <rect x="31" y="15" width="4.5" height="30" rx="2" fill="#fff"/>
+        <path d="M35 15 C44 18 49 24 46 34 C45 28 41 25 35 24 Z" fill="#fff"/>
+      </svg>
+    </button>
+    <p class="home-naam">KeyChanger</p>
+    <p class="home-tip">Tik op het logo om te beginnen</p>
+  </section>
+
+  <!-- Volledig scherm aan/uit (rechtsboven). Verschijnt alleen als de browser dit toestaat -->
+  <button class="vol-knop glass" id="volKnop" type="button" aria-label="Volledig scherm" title="Volledig scherm" hidden>
+    <svg class="ico-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+    <svg class="ico-uit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3a2 2 0 0 0 2-2V3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M21 16h-3a2 2 0 0 0-2 2v3"/></svg>
+  </button>
+
+  <div class="melding glass" id="melding" role="status" aria-live="polite"></div>
 
   <!-- Logo links boven: klik erop om alles terug te zetten -->
   <a class="merk" id="logo" href="./" aria-label="KeyChanger, alles terugzetten" title="Alles terugzetten">
@@ -310,7 +676,13 @@
 
     <div class="eq" id="eq" aria-hidden="true"></div>
 
-    <textarea id="tekst" class="glass" spellcheck="false" autocomplete="off" placeholder="Typ of plak hier je akkoorden of songtekst..."></textarea>
+    <div class="tekstdoos" id="tekstdoos">
+      <textarea id="tekst" class="glass" spellcheck="false" autocomplete="off" placeholder="Typ of plak hier je akkoorden of songtekst..."></textarea>
+      <button class="tekst-vol-knop glass" id="tekstVol" type="button" aria-label="Tekstvak over het hele scherm" title="Tekstvak over het hele scherm">
+        <svg class="ico-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        <svg class="ico-uit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3a2 2 0 0 0 2-2V3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M21 16h-3a2 2 0 0 0-2 2v3"/></svg>
+      </button>
+    </div>
 
     <div class="keuzes">
       <div class="toonhoogte">
@@ -337,9 +709,15 @@
       <span class="getal" id="capo">12</span>
     </div>
 
-    <button class="oke glass" id="oke" type="button">Oké</button>
+    <div class="acties">
+      <button class="schakel glass" id="shorter" type="button" role="switch" aria-checked="false" title="Haalt alles achter de akkoorden weg (7, sus, add, /...) en laat alleen het gewone akkoord over">
+        <span>Shorter</span>
+        <span class="schakel-spoor" aria-hidden="true"><span class="schakel-bol"></span></span>
+      </button>
+      <button class="oke glass" id="oke" type="button">Oké</button>
+    </div>
 
-    <p class="tip">Sleep of veeg met je vinger of muis omhoog en omlaag over een letter om de toonhoogte te kiezen (het muiswiel werkt ook). Druk daarna op Oké.</p>
+    <p class="tip">Sleep of veeg met je vinger of muis omhoog en omlaag over een letter om de toonhoogte te kiezen (het muiswiel werkt ook). Druk daarna op Oké. Met Shorter houd je alleen de gewone akkoorden over.</p>
   </main>
 
   <script>
@@ -360,6 +738,20 @@
     // Hoeveel stappen de tekst al is opgeschoven (zodat een tweede keer Oké niet dubbel schuift)
     let toegepast = 0;
 
+    // Shorter: staat de schakelaar aan, dan onthouden we de volledige akkoorden (om terug te kunnen zetten)
+    // en de ingekorte tekst die we er zelf van gemaakt hebben
+    let shorter = false;
+    let volleTekst = null;
+    let verkortTekst = null;
+
+    // Het patroon waarmee een los akkoord wordt herkend, met alles erachter:
+    //   1: wat ervoor staat   2: letter A-G (hoofdletter of kleine letter)   3: # of b
+    //   4: alles achter het akkoord (m, 7, maj7, sus4, add9, dim, aug, m7b5, 7(b9), ...)
+    //   5+6: de basnoot na een schuine streep (C/G)
+    function akkoordPatroon() {
+      return /(^|[^A-Za-z0-9#'’_])([A-Ga-g])([#b]?)((?:(?:maj|min|dim|aug|sus|add|m|\d|[#b](?=\d)|[+°ø])*)(?:\([^()\s]{1,8}\))?)(?:\/([A-Ga-g])([#b]?))?(?![A-Za-z0-9#'’_]|-[a-z]{3,})/g;
+    }
+
     // Zoekt alle losse akkoorden in de tekst, met een hoofdletter of een kleine letter
     // (A, a, Dm, dm, G7, C#, f#, Bb, C/G, c/g) en schuift ze op.
     // Positief = omhoog, negatief = omlaag.
@@ -369,8 +761,7 @@
       const s = ((stappen % 12) + 12) % 12;
       if (s === 0) return tekst;
 
-      //            1: wat ervoor staat     2: letter  3: # of b  4: m, 7, maj7, ...   5+6: basnoot na /
-      const patroon = /(^|[^A-Za-z0-9#'’_])([A-Ga-g])([#b]?)((?:maj|min|dim|aug|sus|add|m)?\d*)(?:\/([A-Ga-g])([#b]?))?(?![A-Za-z0-9#'’_]|-[a-z]{3,})/g;
+      const patroon = akkoordPatroon();
 
       // Schuift één noot op en houdt hoofdletter of kleine letter zoals het was
       function verschuif(letter, teken) {
@@ -384,6 +775,16 @@
         let uit = voor + verschuif(letter, teken) + uitbreiding;
         if (bas) uit += "/" + verschuif(bas, basTeken);
         return uit;
+      });
+    }
+
+    // Shorter: haalt alles naast het akkoord weg. Dus Cmaj7 -> C, G7 -> G, Dsus4 -> D, Cadd9 -> C,
+    // Am7b5 -> Am en C/G -> C (de basnoot na de schuine streep gaat ook weg).
+    // Een kleine "m" (mineur) blijft staan, want Am en A zijn twee verschillende akkoorden.
+    function verkort(tekst) {
+      return tekst.replace(akkoordPatroon(), function (_, voor, letter, teken, uitbreiding) {
+        const mineur = /^m(?!aj)/.test(uitbreiding) ? "m" : "";
+        return voor + letter + teken + mineur;
       });
     }
 
@@ -432,10 +833,12 @@
       let wielTeller = 0;
 
       wiel.addEventListener("pointerdown", function (e) {
+        // Met een muis telt alleen de linkerknop (vinger en pen hebben dit probleem niet)
+        if (e.pointerType === "mouse" && e.button !== 0) return;
         actief = true;
         startY = e.clientY;
         startStand = stand[wie];
-        wiel.setPointerCapture(e.pointerId);
+        try { wiel.setPointerCapture(e.pointerId); } catch (fout) { /* niet erg: slepen werkt dan nog steeds */ }
         wiel.classList.add("sleept");
         e.preventDefault();
       });
@@ -479,7 +882,20 @@
     // ---------- Tekst aanpassen: pas na het langsvliegen van het logo ----------
     function pasTekstAan() {
       const gewenst = gewensteVerschuiving();
-      tekstvak.value = transponeer(tekstvak.value, gewenst - toegepast);
+      const stappen = gewenst - toegepast;
+      // Heb je de ingekorte tekst zelf niet aangepast? Dan schuiven we de volledige versie mee, zodat Shorter uit nog klopt
+      const ongewijzigd = shorter && volleTekst !== null && tekstvak.value === verkortTekst;
+      let nieuw = transponeer(tekstvak.value, stappen);
+      if (shorter) {
+        if (ongewijzigd) {
+          volleTekst = transponeer(volleTekst, stappen);
+        } else {
+          nieuw = verkort(nieuw);        // zelf getypte of geplakte akkoorden ook inkorten
+          volleTekst = null;
+        }
+        verkortTekst = nieuw;
+      }
+      tekstvak.value = nieuw;
       toegepast = gewenst;
       tekstvak.classList.remove("verlicht");
       void tekstvak.offsetWidth;
@@ -511,15 +927,28 @@
       vliegt = true;
       okeKnop.disabled = true;
 
+      // Op een telefoon kan het tekstvak buiten beeld staan: scroll er eerst naartoe,
+      // dan pas vliegt het logo
+      const r = tekstvak.getBoundingClientRect();
+      const inBeeld = r.top >= 0 && r.bottom <= window.innerHeight;
+      if (inBeeld) {
+        vlieg();
+      } else {
+        tekstvak.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(vlieg, 600);
+      }
+    });
+
+    function vlieg() {
       // Een kopie van het logo vliegt van links naar rechts over het tekstvak
       const vlieger = document.createElement("div");
       vlieger.className = "vlieger";
       vlieger.appendChild(logo.querySelector("svg").cloneNode(true));
-      const t0 = tekstvak.getBoundingClientRect();
-      vlieger.style.top = (t0.top + t0.height / 2 - 40) + "px";
       document.body.appendChild(vlieger);
+      const t0 = tekstvak.getBoundingClientRect();
+      vlieger.style.top = (t0.top + t0.height / 2 - vlieger.offsetHeight / 2) + "px";
 
-      const breedte = window.innerWidth;
+      const breedte = document.documentElement.clientWidth;
       const animatie = vlieger.animate(
         [
           { transform: "translateX(-140px) rotate(0deg)" },
@@ -552,7 +981,7 @@
         vliegt = false;
         okeKnop.disabled = false;
       };
-    });
+    }
 
     // ---------- Klik op het logo: alles terug naar het begin ----------
     logo.addEventListener("click", function (e) {
@@ -561,6 +990,7 @@
       stand.orig = 0;
       stand.nieuw = 0;
       toegepast = 0;
+      resetShorter();
       tekstvak.value = "";
       toon();
       pulseer();
@@ -572,7 +1002,9 @@
     // ---------- Versiering ----------
     // Equalizer-balkjes
     const eq = document.getElementById("eq");
-    for (let i = 0; i < 40; i++) {
+    // Op een telefoon minder balkjes en nootjes, zodat het soepel blijft
+    const klein = window.matchMedia("(max-width: 520px)").matches;
+    for (let i = 0; i < (klein ? 24 : 40); i++) {
       const balk = document.createElement("span");
       balk.style.animationDelay = (-Math.random() * 1.6).toFixed(2) + "s";
       balk.style.animationDuration = (1 + Math.random() * 1.2).toFixed(2) + "s";
@@ -589,7 +1021,7 @@
     // Zwevende muzieknootjes
     const regen = document.getElementById("noten-regen");
     const tekens = ["♪", "♫", "♩", "♬"];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < (klein ? 9 : 16); i++) {
       const n = document.createElement("span");
       n.className = "noot";
       n.textContent = tekens[i % tekens.length];
@@ -599,6 +1031,171 @@
       n.style.animationDelay = (-Math.random() * 25).toFixed(1) + "s";
       regen.appendChild(n);
     }
+
+    // ---------- Shorter-schakelaar ----------
+    const shorterKnop = document.getElementById("shorter");
+    const meldingEl = document.getElementById("melding");
+    let meldingTimer = null;
+
+    function toonMelding(tekst) {
+      meldingEl.textContent = tekst;
+      meldingEl.classList.add("zichtbaar");
+      clearTimeout(meldingTimer);
+      meldingTimer = setTimeout(function () { meldingEl.classList.remove("zichtbaar"); }, 4200);
+    }
+
+    function flits() {
+      tekstvak.classList.remove("verlicht");
+      void tekstvak.offsetWidth;
+      tekstvak.classList.add("verlicht");
+    }
+
+    function resetShorter() {
+      shorter = false;
+      volleTekst = null;
+      verkortTekst = null;
+      shorterKnop.setAttribute("aria-checked", "false");
+    }
+
+    shorterKnop.addEventListener("click", function () {
+      shorter = !shorter;
+      shorterKnop.setAttribute("aria-checked", shorter ? "true" : "false");
+      if (shorter) {
+        // Aan: alles naast de akkoorden verdwijnt meteen
+        volleTekst = tekstvak.value;
+        verkortTekst = verkort(tekstvak.value);
+        tekstvak.value = verkortTekst;
+        flits();
+      } else {
+        // Uit: de volledige akkoorden komen terug, tenzij je de tekst ondertussen zelf hebt aangepast
+        if (volleTekst !== null && tekstvak.value === verkortTekst) {
+          tekstvak.value = volleTekst;
+          flits();
+        } else if (tekstvak.value.trim() !== "") {
+          toonMelding("Je hebt de tekst zelf aangepast, daarom kunnen de oorspronkelijke akkoorden niet terug.");
+        }
+        volleTekst = null;
+        verkortTekst = null;
+      }
+      pulseer();
+    });
+
+    // ---------- Startscherm ----------
+    const home = document.getElementById("home");
+    document.getElementById("startLogo").addEventListener("click", function () {
+      if (!document.body.classList.contains("start")) return;
+      home.classList.add("weg");
+      document.body.classList.remove("start");
+      setTimeout(function () { home.hidden = true; }, 520);
+    });
+
+    // ---------- Volledig scherm (hele pagina, knop rechtsboven) ----------
+    const volKnop = document.getElementById("volKnop");
+    const wortel = document.documentElement;
+    const vraagFs = wortel.requestFullscreen || wortel.webkitRequestFullscreen;
+    const fsToegestaan = document.fullscreenEnabled !== undefined ? document.fullscreenEnabled : document.webkitFullscreenEnabled;
+    // iPhone-Safari laat websites niet schermvullend gaan: daar blijft de knop weg
+    // (via "Zet op beginscherm" opent de site wel schermvullend)
+    const fsMogelijk = !!vraagFs && fsToegestaan !== false;
+    volKnop.hidden = !fsMogelijk;
+
+    function fsElement() {
+      return document.fullscreenElement || document.webkitFullscreenElement || null;
+    }
+
+    function gaFs(bijFout) {
+      try {
+        const p = vraagFs.call(wortel);
+        if (p && p.catch) p.catch(function () { if (bijFout) bijFout(); });
+      } catch (fout) {
+        if (bijFout) bijFout();
+      }
+    }
+
+    function verlaatFs() {
+      const uit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (!uit) return;
+      try {
+        const p = uit.call(document);
+        if (p && p.catch) p.catch(function () {});
+      } catch (fout) { /* niet erg */ }
+    }
+
+    function updateFsKnop() {
+      const aan = !!fsElement();
+      volKnop.classList.toggle("is-vol", aan);
+      const tekst = aan ? "Volledig scherm verlaten" : "Volledig scherm";
+      volKnop.setAttribute("aria-label", tekst);
+      volKnop.title = tekst;
+    }
+
+    volKnop.addEventListener("click", function () {
+      if (fsElement()) verlaatFs(); else gaFs();
+    });
+
+    // ---------- Tekstvak over het hele scherm (wit met zwarte letters) ----------
+    const tekstdoos = document.getElementById("tekstdoos");
+    const tekstVolKnop = document.getElementById("tekstVol");
+    let tekstFsZelf = false;     // klopt als wij het volledige scherm hebben aangezet (en dus ook weer uit mogen zetten)
+
+    function tekstVolOpen() {
+      return tekstdoos.classList.contains("vol");
+    }
+
+    // Op een telefoon schuift het toetsenbord over het tekstvak heen: pas de hoogte aan het zichtbare deel aan
+    function pasTekstHoogte() {
+      if (!tekstVolOpen() || !window.visualViewport) return;
+      tekstdoos.style.top = window.visualViewport.offsetTop + "px";
+      tekstdoos.style.height = window.visualViewport.height + "px";
+      tekstdoos.style.bottom = "auto";
+    }
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", pasTekstHoogte);
+      window.visualViewport.addEventListener("scroll", pasTekstHoogte);
+    }
+
+    function openTekstVol() {
+      tekstdoos.classList.add("vol");
+      document.body.classList.add("tekst-vol");
+      tekstVolKnop.setAttribute("aria-label", "Tekstvak weer klein maken");
+      tekstVolKnop.title = "Tekstvak weer klein maken";
+      pasTekstHoogte();
+      // Op laptop, tablet en Android gaat de browser er ook echt schermvullend bij
+      if (fsMogelijk && !fsElement()) {
+        tekstFsZelf = true;
+        gaFs(function () { tekstFsZelf = false; });
+      }
+    }
+
+    function sluitTekstVol() {
+      const mochtUit = tekstFsZelf;
+      tekstFsZelf = false;
+      tekstdoos.classList.remove("vol");
+      document.body.classList.remove("tekst-vol");
+      tekstdoos.style.top = "";
+      tekstdoos.style.height = "";
+      tekstdoos.style.bottom = "";
+      tekstVolKnop.setAttribute("aria-label", "Tekstvak over het hele scherm");
+      tekstVolKnop.title = "Tekstvak over het hele scherm";
+      if (mochtUit && fsElement()) verlaatFs();
+    }
+
+    tekstVolKnop.addEventListener("click", function () {
+      if (tekstVolOpen()) sluitTekstVol(); else openTekstVol();
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && tekstVolOpen()) sluitTekstVol();
+    });
+
+    // Eén plek die reageert als het volledige scherm aan of uit gaat
+    function fsGewijzigd() {
+      updateFsKnop();
+      // Drukt iemand op Esc en gaat het volledige scherm uit, dan sluit het grote tekstvak mee
+      if (tekstFsZelf && !fsElement() && tekstVolOpen()) sluitTekstVol();
+    }
+    document.addEventListener("fullscreenchange", fsGewijzigd);
+    document.addEventListener("webkitfullscreenchange", fsGewijzigd);
 
     toon();
   </script>
