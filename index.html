@@ -19,6 +19,39 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Sora:wght@600;800&display=swap" rel="stylesheet">
+.tekst-bewerk-knop{
+  display:none;
+}
+
+#zoomSlider{
+  display:none;
+}
+
+.tekstdoos.vol .tekst-bewerk-knop{
+  position:absolute;
+  top:70px;
+  right:14px;
+  width:46px;
+  height:46px;
+  border:none;
+  border-radius:12px;
+  background:#eef2f7;
+  z-index:500;
+  font-size:22px;
+  cursor:pointer;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.tekstdoos.vol #zoomSlider{
+  display:block;
+  position:absolute;
+  top:130px;
+  right:22px;
+  height:180px;
+  z-index:500;
+}
 
   <style>
     :root {
