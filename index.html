@@ -817,12 +817,28 @@
     // Shorter: haalt alles naast het akkoord weg. Dus Cmaj7 -> C, G7 -> G, Dsus4 -> D, Cadd9 -> C,
     // Am7b5 -> Am en C/G -> C (de basnoot na de schuine streep gaat ook weg).
     // Een kleine "m" (mineur) blijft staan, want Am en A zijn twee verschillende akkoorden.
-    function verkort(tekst) {
-      return tekst.replace(akkoordPatroon(), function (_, voor, letter, teken, uitbreiding) {
-        const mineur = /^m(?!aj)/.test(uitbreiding) ? "m" : "";
-        return voor + letter + teken + mineur;
-      });
+   function verkort(tekst) {
+  return tekst.replace(
+    akkoordPatroon(),
+    function (_, voor, letter, teken, uitbreiding) {
+
+      const mineur =
+        /^m(?!aj)/.test(uitbreiding)
+          ? "m"
+          : "";
+
+      const kort = letter + teken + mineur;
+
+      const origineleLengte =
+        (letter + teken + uitbreiding).length;
+
+      return (
+        voor +
+        kort.padEnd(origineleLengte, " ")
+      );
     }
+  );
+}
 
     // Capo: nieuwe toonhoogte hoger dan origineel -> 1, 2, 3, ...
     //       gelijk -> 12
