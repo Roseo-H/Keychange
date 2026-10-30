@@ -11,6 +11,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="KeyChanger">
   <title>KeyChanger</title>
+  <link rel="manifest" href="./manifest.webmanifest">\n  <link rel="apple-touch-icon" href="./icon.svg">
+  <meta name="apple-mobile-web-app-title" content="KeyChanger">
+  <meta name="description" content="Zet akkoorden in een andere toonsoort met KeyChanger.">
 
   <!-- Logo (muzieknoot) in het tabblad van de browser, zit in de code zelf: je hoeft niets te uploaden. -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%230b5ed7'/%3E%3Cstop offset='1' stop-color='%2334d399'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Cellipse cx='25' cy='45' rx='9' ry='7' transform='rotate(-20 25 45)' fill='white'/%3E%3Crect x='31' y='15' width='4.5' height='30' rx='2' fill='white'/%3E%3Cpath d='M35 15 C44 18 49 24 46 34 C45 28 41 25 35 24 Z' fill='white'/%3E%3C/svg%3E">
@@ -582,6 +585,7 @@
     .kopieer-knop:active { transform: scale(0.97); }
     .kopieer-knop:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
 
+    .tekstdoos.vol .tekst-acties { display:contents; }
     .tekstdoos.vol .kopieer-knop {
       position: absolute;
       z-index: 2;
@@ -820,6 +824,34 @@
     @media (prefers-reduced-motion: reduce) {
       body, .bol, .noot, .eq span, .home-logo, .home-tip, .kaart, .bieb { animation: none !important; }
     }
+
+    /* ---------- Accounts en opgeslagen teksten ---------- */
+    .account-pane { margin: 0 0 18px; padding: 14px; border-radius: 20px; }
+    .account-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .account-row input { flex:1 1 150px; min-width:0; padding:11px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.45); background:rgba(255,255,255,.16); color:#fff; font: inherit; }
+    .account-row input::placeholder { color:rgba(255,255,255,.75); }
+    .account-row button, .saved-card button, .save-knop { border:1px solid rgba(255,255,255,.4); color:#fff; background:rgba(255,255,255,.16); font:inherit; font-weight:600; cursor:pointer; }
+    .account-row button { padding:10px 14px; border-radius:12px; }
+    .account-status { margin:8px 0 0; font-size:13px; opacity:.9; }
+    .tekst-acties { display:flex; gap:10px; margin-top:10px; }
+    .tekst-acties .kopieer-knop, .tekst-acties .save-knop { flex:1; width:50%; margin-top:0; min-height:48px; }
+    .save-knop { display:flex; align-items:center; justify-content:center; border-radius:16px; padding:12px; }
+    .save-knop svg { width:22px; height:22px; }
+    .tekstdoos.vol .save-knop { position:absolute; z-index:2; width:44px; height:44px; min-height:44px; padding:0; right:calc(env(safe-area-inset-right, 0px) + 68px); bottom:calc(env(safe-area-inset-bottom, 0px) + 14px); border-radius:12px; background:#eef2f7; color:#111; border:1px solid #cfd8e3; }
+    .saved-page { display:none; position:relative; z-index:1; width:min(900px,100%); }
+    body.saved-open .kaart, body.saved-open .bieb { display:none !important; }
+    body.saved-open .saved-page { display:block; animation:verschijn .5s ease backwards; }
+    body.saved-open .merk { position:fixed; }
+    .saved-page h1 { text-shadow:0 4px 24px rgba(0,20,60,.4); }
+    .saved-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; margin-top:22px; }
+    .saved-card { padding:18px; border-radius:20px; min-width:0; }
+    .saved-card h3 { margin:0 0 8px; font-family:var(--kop); overflow-wrap:anywhere; }
+    .saved-card p { white-space:pre-wrap; overflow-wrap:anywhere; max-height:110px; overflow:hidden; font-size:14px; opacity:.9; }
+    .saved-card .saved-actions { display:flex; gap:8px; }
+    .saved-card button { padding:9px 12px; border-radius:12px; }
+    .saved-empty { text-align:center; opacity:.9; padding:28px 12px; }
+    @media(max-width:520px) { .account-row button { flex:1; } }
+
   </style>
 </head>
 
@@ -878,17 +910,35 @@
     <h1>KeyChanger</h1>
     <p class="ondertitel">Zet je akkoorden in een andere toonsoort en zie meteen welke capo je nodig hebt.</p>
 
+    <section class="account-pane glass" aria-label="Account">
+      <div class="account-row" id="authForm">
+        <input id="authEmail" type="email" autocomplete="email" placeholder="E-mailadres" aria-label="E-mailadres">
+        <input id="authPassword" type="password" autocomplete="current-password" placeholder="Wachtwoord" aria-label="Wachtwoord">
+        <button type="button" id="signInBtn">Inloggen</button>
+        <button type="button" id="signUpBtn">Account maken</button>
+      </div>
+      <div class="account-row" id="signedIn" hidden>
+        <span id="userEmail" style="flex:1;overflow-wrap:anywhere"></span>
+        <button type="button" id="signOutBtn">Uitloggen</button>
+      </div>
+      <p class="account-status" id="authStatus">Log in om je teksten online op te slaan op al je apparaten.</p>
+    </section>
+
     <div class="eq" id="eq" aria-hidden="true"></div>
 
     <div class="tekstdoos" id="tekstdoos">
       <textarea id="tekst" class="glass" spellcheck="false" autocomplete="off" placeholder="Typ of plak hier je akkoorden of songtekst..."></textarea>
 
-      <!-- Kopieer alles: onder het tekstvak, en rechtsonder als het tekstvak over het hele scherm is -->
+      <!-- Kopiëren en opslaan staan naast elkaar onder het tekstvak -->
+      <div class="tekst-acties">
       <button class="kopieer-knop glass" id="kopieerKnop" type="button" aria-label="Alle tekst kopiëren" title="Alle tekst kopiëren">
         <svg class="ico-kopie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><rect x="4" y="4" width="11" height="11" rx="2"></rect></svg>
         <svg class="ico-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
       </button>
-
+      <button class="save-knop glass" id="saveTextBtn" type="button" aria-label="Tekst opslaan" title="Tekst opslaan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+      </button>
+      </div>
       <button class="tekst-vol-knop glass" id="tekstVol" type="button" aria-label="Tekstvak over het hele scherm" title="Tekstvak over het hele scherm">
         <svg class="ico-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
         <svg class="ico-uit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3a2 2 0 0 0 2-2V3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M21 16h-3a2 2 0 0 0-2 2v3"/></svg>
@@ -944,6 +994,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
       <span>Akkoordenbibliotheek</span>
     </button>
+    <button class="bieb-knop glass" id="savedPageBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5z"/><path d="M4 5.5v13M8 7h8M8 11h8"/></svg>
+      <span>Opgeslagen teksten</span>
+    </button>
 
     <p class="tip">Sleep of veeg met je vinger of muis omhoog en omlaag over een letter om de toonhoogte te kiezen (het muiswiel werkt ook). Druk daarna op Oké. Met Shorter houd je alleen de gewone akkoorden over.</p>
   </main>
@@ -955,6 +1009,14 @@
     <div id="biebInhoud"></div>
   </section>
 
+  <section class="saved-page" id="savedPage" aria-label="Opgeslagen teksten">
+    <h1>Opgeslagen teksten</h1>
+    <p class="ondertitel">Al je bewaarde akkoorden en songteksten op één plek.</p>
+    <div class="saved-list" id="savedList"><p class="saved-empty">Je opgeslagen teksten verschijnen hier.</p></div>
+  </section>
+
+  <!-- Supabase verzorgt accounts en de online database. Vul je eigen projectgegevens hieronder in. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // ---------- Toonhoogtes ----------
     // Alle toonhoogtes in volgorde: C, C#, D, D#, E, F, F#, G, G#, A, A#, B
@@ -1279,6 +1341,10 @@
       e.preventDefault();
       if (document.body.classList.contains("bieb-open")) {
         sluitBieb();
+        return;
+      }
+      if (document.body.classList.contains("saved-open")) {
+        location.hash = "";
         return;
       }
       if (vliegt) return;
@@ -1873,6 +1939,169 @@
 
     document.getElementById("biebKnop").addEventListener("click", openBieb);
     window.addEventListener("hashchange", pasPaginaAan);
+
+
+    // =====================================================================
+    // ACCOUNTS, ONLINE OPSLAAN EN OPGESLAGEN TEKSTEN
+    // =====================================================================
+    // Maak een gratis project op https://supabase.com en vul hier Project URL
+    // en anon/public key in. De SQL staat in database.sql naast dit bestand.
+    const SUPABASE_URL = "VUL_HIER_JE_SUPABASE_PROJECT_URL_IN";
+    const SUPABASE_ANON_KEY = "VUL_HIER_JE_SUPABASE_ANON_KEY_IN";
+    let supabaseClient = null;
+    let huidigeGebruiker = null;
+
+    const authStatus = document.getElementById("authStatus");
+    const authForm = document.getElementById("authForm");
+    const signedIn = document.getElementById("signedIn");
+
+    function statusAccount(tekst) { authStatus.textContent = tekst; }
+
+    if (window.supabase && SUPABASE_URL.startsWith("https://") &&
+        !SUPABASE_URL.includes("VUL_HIER") && !SUPABASE_ANON_KEY.includes("VUL_HIER")) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      supabaseClient.auth.getSession().then(({ data }) => verwerkSessie(data.session));
+      supabaseClient.auth.onAuthStateChange((_event, session) => verwerkSessie(session));
+    } else {
+      statusAccount("Accountdatabase nog niet gekoppeld. Vul eerst je Supabase-projectgegevens in (uitleg in database.sql).");
+    }
+
+    function verwerkSessie(session) {
+      huidigeGebruiker = session && session.user ? session.user : null;
+      authForm.hidden = !!huidigeGebruiker;
+      signedIn.hidden = !huidigeGebruiker;
+      document.getElementById("userEmail").textContent = huidigeGebruiker ? huidigeGebruiker.email : "";
+      if (huidigeGebruiker) {
+        statusAccount("Ingelogd. Je teksten worden aan dit account gekoppeld.");
+        if (location.hash === "#opgeslagen") laadOpgeslagenTeksten();
+      } else if (supabaseClient) {
+        statusAccount("Log in om je teksten online op te slaan op al je apparaten.");
+      }
+    }
+
+    async function accountActie(actie) {
+      if (!supabaseClient) { statusAccount("Koppel eerst Supabase. Zie database.sql."); return; }
+      const email = document.getElementById("authEmail").value.trim();
+      const password = document.getElementById("authPassword").value;
+      if (!email || !password) { statusAccount("Vul je e-mailadres en wachtwoord in."); return; }
+      statusAccount("Even bezig...");
+      const result = actie === "signup"
+        ? await supabaseClient.auth.signUp({ email, password })
+        : await supabaseClient.auth.signInWithPassword({ email, password });
+      if (result.error) statusAccount(result.error.message);
+      else if (actie === "signup" && !result.data.session)
+        statusAccount("Account aangemaakt. Bevestig je e-mailadres via de mail en log daarna in.");
+      else statusAccount("Gelukt!");
+    }
+
+    document.getElementById("signInBtn").addEventListener("click", () => accountActie("signin"));
+    document.getElementById("signUpBtn").addEventListener("click", () => accountActie("signup"));
+    document.getElementById("signOutBtn").addEventListener("click", async () => {
+      if (supabaseClient) await supabaseClient.auth.signOut();
+    });
+
+    async function slaTekstOp() {
+      const inhoud = tekstvak.value.trim();
+      if (!inhoud) { toonMelding("Er staat nog geen tekst in het tekstvak."); return; }
+      if (!supabaseClient || !huidigeGebruiker) {
+        toonMelding("Log eerst in om je tekst veilig online op te slaan.");
+        return;
+      }
+      const naam = prompt("Geef deze tekst een naam:", "Mijn akkoorden");
+      if (naam === null) return;
+      const { error } = await supabaseClient.from("saved_texts").insert({
+        user_id: huidigeGebruiker.id,
+        title: naam.trim() || "Naamloze tekst",
+        content: inhoud
+      });
+      if (error) { toonMelding("Opslaan mislukt: " + error.message); return; }
+      toonMelding("Tekst opgeslagen!");
+      if (location.hash === "#opgeslagen") laadOpgeslagenTeksten();
+    }
+    document.getElementById("saveTextBtn").addEventListener("click", slaTekstOp);
+
+    async function laadOpgeslagenTeksten() {
+      const lijst = document.getElementById("savedList");
+      if (!supabaseClient || !huidigeGebruiker) {
+        lijst.innerHTML = '<p class="saved-empty">Log in om je persoonlijke opgeslagen teksten te bekijken.</p>';
+        return;
+      }
+      lijst.innerHTML = '<p class="saved-empty">Opgeslagen teksten laden...</p>';
+      const { data, error } = await supabaseClient.from("saved_texts")
+        .select("id,title,content,created_at").order("created_at", { ascending: false });
+      if (error) {
+        lijst.textContent = "Kon teksten niet laden: " + error.message;
+        return;
+      }
+      if (!data || !data.length) {
+        lijst.innerHTML = '<p class="saved-empty">Je hebt nog geen teksten opgeslagen. Ga terug en druk op het opslaan-icoon.</p>';
+        return;
+      }
+      lijst.innerHTML = "";
+      data.forEach(item => {
+        const kaart = document.createElement("article");
+        kaart.className = "saved-card glass";
+        const titel = document.createElement("h3");
+        titel.textContent = item.title;
+        const datum = document.createElement("small");
+        datum.textContent = new Date(item.created_at).toLocaleDateString("nl-NL");
+        const preview = document.createElement("p");
+        preview.textContent = item.content;
+        const acties = document.createElement("div");
+        acties.className = "saved-actions";
+        const open = document.createElement("button");
+        open.type = "button"; open.textContent = "Openen";
+        open.addEventListener("click", () => {
+          tekstvak.value = item.content;
+          location.hash = "";
+          window.scrollTo(0, 0);
+          toonMelding("Tekst teruggezet in het tekstvak.");
+        });
+        const verwijderen = document.createElement("button");
+        verwijderen.type = "button"; verwijderen.textContent = "Verwijderen";
+        verwijderen.addEventListener("click", async () => {
+          if (!confirm("Deze opgeslagen tekst verwijderen?")) return;
+          const { error: deleteError } = await supabaseClient.from("saved_texts").delete().eq("id", item.id);
+          if (deleteError) toonMelding("Verwijderen mislukt: " + deleteError.message);
+          else laadOpgeslagenTeksten();
+        });
+        acties.append(open, verwijderen);
+        kaart.append(titel, datum, preview, acties);
+        lijst.appendChild(kaart);
+      });
+    }
+
+    // De bibliotheek en de opgeslagen teksten zijn aparte interne pagina's.
+    const originelePasPaginaAan = pasPaginaAan;
+    pasPaginaAan = function () {
+      const hash = location.hash;
+      if (hash === "#opgeslagen") {
+        document.body.classList.remove("bieb-open");
+        document.body.classList.add("saved-open");
+        logo.title = "Terug naar KeyChanger";
+        logo.setAttribute("aria-label", "KeyChanger, terug naar de gewone pagina");
+        laadOpgeslagenTeksten();
+        window.scrollTo(0, 0);
+      } else {
+        document.body.classList.remove("saved-open");
+        originelePasPaginaAan();
+      }
+    };
+    window.removeEventListener("hashchange", originelePasPaginaAan);
+    window.addEventListener("hashchange", pasPaginaAan);
+    document.getElementById("savedPageBtn").addEventListener("click", () => { location.hash = "opgeslagen"; });
+    // Op het logo klikken brengt je vanaf beide subpagina's terug naar de hoofdpagina.
+    logo.addEventListener("click", function (event) {
+      if (location.hash === "#akkoorden" || location.hash === "#opgeslagen") {
+        event.preventDefault();
+        location.hash = "";
+      }
+    });
+
+    // Installeerbare app: service worker werkt alleen via HTTPS of localhost.
+    if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(err => console.warn("Service worker:", err)));
+    }
 
     toon();
     pasPaginaAan();
