@@ -9,9 +9,9 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="KeyChanger">
   <title>KeyChanger</title>
-  <link rel="manifest" href="./manifest.webmanifest">\n  <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon.svg">
   <meta name="apple-mobile-web-app-title" content="KeyChanger">
   <meta name="description" content="Zet akkoorden in een andere toonsoort met KeyChanger.">
 
@@ -151,6 +151,11 @@
       padding: 28px;
       border-radius: 32px;
     }
+
+    .app-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .app-heading h1 { margin-bottom:4px; }
+    .logout-app { flex:none; padding:8px 12px; border:1px solid rgba(255,255,255,.4); border-radius:12px; background:rgba(255,255,255,.16); color:#fff; font:inherit; cursor:pointer; }
+    .logout-app[hidden] { display:none; }
 
     h1 {
       margin: 0 0 4px;
@@ -380,31 +385,43 @@
     }
     @keyframes knipper { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 
-    /* ---------- Knop rechtsboven: volledig scherm aan/uit ---------- */
-    .vol-knop {
+
+    /* ---------- Aparte inlogpagina ---------- */
+    body.login-open { overflow: hidden; min-height: 100vh; min-height: 100dvh; }
+    body.login-open .kaart, body.login-open .merk, body.login-open .bieb,
+    body.login-open .saved-page { display: none !important; }
+    .login-page {
       position: fixed;
-      top: calc(env(safe-area-inset-top, 0px) + 16px);
-      right: calc(env(safe-area-inset-right, 0px) + 16px);
-      z-index: 30;
-      width: 48px;
-      height: 48px;
-      padding: 0;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      transition: background 0.2s, transform 0.15s;
+      inset: 0;
+      z-index: 25;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+      padding: calc(env(safe-area-inset-top, 0px) + 24px) 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
     }
-    .vol-knop[hidden] { display: none; }
-    .vol-knop svg { width: 24px; height: 24px; display: block; }
-    .vol-knop .ico-uit { display: none; }
-    .vol-knop.is-vol .ico-in { display: none; }
-    .vol-knop.is-vol .ico-uit { display: block; }
-    @media (hover: hover) { .vol-knop:hover { background: rgba(255, 255, 255, 0.28); } }
-    .vol-knop:active { transform: scale(0.92); }
-    .vol-knop:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
+    .login-page[hidden] { display: none !important; }
+    .login-card {
+      width: min(520px, 100%);
+      padding: clamp(22px, 5vw, 34px);
+      border-radius: 28px;
+      text-align: center;
+    }
+    .login-card h1 { font-size: clamp(27px, 6vw, 38px); }
+    .login-card .ondertitel { margin: 8px 0 24px; }
+    .login-logo {
+      display: block; width: 76px; height: 76px; padding: 0; margin: 0 auto 18px;
+      border: 0; border-radius: 18px; background: none; cursor: pointer;
+      filter: drop-shadow(0 8px 18px rgba(0,20,60,.35));
+    }
+    .login-logo svg { width: 100%; height: 100%; display: block; }
+    .login-page .account-pane { margin: 0; padding: 0; background: transparent; border: 0; box-shadow: none; }
+    .login-page .account-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .login-page .account-row input { width: 100%; min-height: 50px; font-size: 16px; }
+    .login-page .account-row button { min-height: 48px; border-radius: 14px; }
+    .login-page .account-status { min-height: 2.8em; line-height: 1.4; overflow-wrap: anywhere; }
+    .login-back-text { margin-top: 16px; border: 0; background: transparent; color: white; font: inherit; cursor: pointer; opacity: .85; }
+    body.start .login-page { display: none; }
 
     /* ---------- Tekstvak met eigen volledig-scherm-knop ---------- */
     .tekstdoos { position: relative; }
@@ -438,7 +455,7 @@
     body.tekst-vol { overflow: hidden; }
     /* Een element met "backdrop-filter" houdt alles daarbinnen vast aan zichzelf: even uit, zodat het tekstvak echt het hele scherm vult */
     body.tekst-vol .kaart { -webkit-backdrop-filter: none; backdrop-filter: none; }
-    body.tekst-vol .merk, body.tekst-vol .vol-knop { visibility: hidden; }
+    body.tekst-vol .merk { visibility: hidden; }
 
     .tekstdoos.vol {
       position: fixed;
@@ -862,7 +879,7 @@
   <div class="bol drie"></div>
   <div class="noten-regen" id="noten-regen" aria-hidden="true"></div>
 
-  <!-- Startscherm: groot logo met de naam. Klik op het logo om naar de site te gaan -->
+  <!-- Startscherm: groot logo met de naam. Klik op het logo om naar de aparte inlogpagina te gaan -->
   <section class="home" id="home" aria-label="Startscherm">
     <button class="home-logo" id="startLogo" type="button" aria-label="Start KeyChanger">
       <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -882,11 +899,37 @@
     <p class="home-tip">Tik op het logo om te beginnen</p>
   </section>
 
-  <!-- Volledig scherm aan/uit (rechtsboven). Verschijnt alleen als de browser dit toestaat -->
-  <button class="vol-knop glass" id="volKnop" type="button" aria-label="Volledig scherm" title="Volledig scherm" hidden>
-    <svg class="ico-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-    <svg class="ico-uit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3a2 2 0 0 0 2-2V3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M21 16h-3a2 2 0 0 0-2 2v3"/></svg>
-  </button>
+  <!-- Aparte inlogpagina: verschijnt pas na een tik op het startlogo -->
+  <section class="login-page" id="loginPage" aria-label="Inloggen bij KeyChanger" hidden>
+    <div class="login-card glass">
+      <button class="login-logo" type="button" id="loginBack" aria-label="Terug naar startscherm">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs><linearGradient id="login-logo-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b5ed7"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs>
+          <rect width="64" height="64" rx="16" fill="url(#login-logo-g)"/>
+          <ellipse cx="25" cy="45" rx="9" ry="7" transform="rotate(-20 25 45)" fill="#fff"/>
+          <rect x="31" y="15" width="4.5" height="30" rx="2" fill="#fff"/>
+          <path d="M35 15 C44 18 49 24 46 34 C45 28 41 25 35 24 Z" fill="#fff"/>
+        </svg>
+      </button>
+      <h1>Welkom bij KeyChanger</h1>
+      <p class="ondertitel">Log in of maak een account om verder te gaan.</p>
+    <section class="account-pane glass" aria-label="Account">
+      <div class="account-row" id="authForm">
+        <input id="authEmail" type="email" autocomplete="email" placeholder="E-mailadres" aria-label="E-mailadres">
+        <input id="authPassword" type="password" autocomplete="current-password" placeholder="Wachtwoord" aria-label="Wachtwoord">
+        <button type="button" id="signInBtn">Inloggen</button>
+        <button type="button" id="signUpBtn">Account maken</button>
+      </div>
+      <div class="account-row" id="signedIn" hidden>
+        <span id="userEmail" style="flex:1;overflow-wrap:anywhere"></span>
+        <button type="button" id="signOutBtn">Uitloggen</button>
+      </div>
+      <p class="account-status" id="authStatus">Log in om je teksten online op te slaan op al je apparaten.</p>
+      <button class="login-back-text" id="loginBackText" type="button">Terug naar startscherm</button>
+  </section>
+    </div>
+  </section>
+
 
   <div class="melding glass" id="melding" role="status" aria-live="polite"></div>
 
@@ -907,22 +950,13 @@
   </a>
 
   <main class="kaart glass">
-    <h1>KeyChanger</h1>
+    <div class="app-heading">
+      <h1>KeyChanger</h1>
+      <button class="logout-app" id="logoutAppBtn" type="button" hidden>Uitloggen</button>
+    </div>
     <p class="ondertitel">Zet je akkoorden in een andere toonsoort en zie meteen welke capo je nodig hebt.</p>
 
-    <section class="account-pane glass" aria-label="Account">
-      <div class="account-row" id="authForm">
-        <input id="authEmail" type="email" autocomplete="email" placeholder="E-mailadres" aria-label="E-mailadres">
-        <input id="authPassword" type="password" autocomplete="current-password" placeholder="Wachtwoord" aria-label="Wachtwoord">
-        <button type="button" id="signInBtn">Inloggen</button>
-        <button type="button" id="signUpBtn">Account maken</button>
-      </div>
-      <div class="account-row" id="signedIn" hidden>
-        <span id="userEmail" style="flex:1;overflow-wrap:anywhere"></span>
-        <button type="button" id="signOutBtn">Uitloggen</button>
-      </div>
-      <p class="account-status" id="authStatus">Log in om je teksten online op te slaan op al je apparaten.</p>
-    </section>
+
 
     <div class="eq" id="eq" aria-hidden="true"></div>
 
@@ -1442,59 +1476,6 @@
       pulseer();
     });
 
-    // ---------- Startscherm ----------
-    const home = document.getElementById("home");
-    document.getElementById("startLogo").addEventListener("click", function () {
-      if (!document.body.classList.contains("start")) return;
-      home.classList.add("weg");
-      document.body.classList.remove("start");
-      setTimeout(function () { home.hidden = true; }, 520);
-    });
-
-    // ---------- Volledig scherm (hele pagina, knop rechtsboven) ----------
-    const volKnop = document.getElementById("volKnop");
-    const wortel = document.documentElement;
-    const vraagFs = wortel.requestFullscreen || wortel.webkitRequestFullscreen;
-    const fsToegestaan = document.fullscreenEnabled !== undefined ? document.fullscreenEnabled : document.webkitFullscreenEnabled;
-    // iPhone-Safari laat websites niet schermvullend gaan: daar blijft de knop weg
-    // (via "Zet op beginscherm" opent de site wel schermvullend)
-    const fsMogelijk = !!vraagFs && fsToegestaan !== false;
-    volKnop.hidden = !fsMogelijk;
-
-    function fsElement() {
-      return document.fullscreenElement || document.webkitFullscreenElement || null;
-    }
-
-    function gaFs(bijFout) {
-      try {
-        const p = vraagFs.call(wortel);
-        if (p && p.catch) p.catch(function () { if (bijFout) bijFout(); });
-      } catch (fout) {
-        if (bijFout) bijFout();
-      }
-    }
-
-    function verlaatFs() {
-      const uit = document.exitFullscreen || document.webkitExitFullscreen;
-      if (!uit) return;
-      try {
-        const p = uit.call(document);
-        if (p && p.catch) p.catch(function () {});
-      } catch (fout) { /* niet erg */ }
-    }
-
-    function updateFsKnop() {
-      const aan = !!fsElement();
-      volKnop.classList.toggle("is-vol", aan);
-      const tekst = aan ? "Volledig scherm verlaten" : "Volledig scherm";
-      volKnop.setAttribute("aria-label", tekst);
-      volKnop.title = tekst;
-    }
-
-    volKnop.addEventListener("click", function () {
-      if (fsElement()) verlaatFs(); else gaFs();
-    });
-
     // ---------- Tekstvak over het hele scherm (wit met zwarte letters) ----------
     const tekstdoos = document.getElementById("tekstdoos");
     const tekstVolKnop = document.getElementById("tekstVol");
@@ -1946,7 +1927,7 @@
     // =====================================================================
     // Maak een gratis project op https://supabase.com en vul hier Project URL
     // en anon/public key in. De SQL staat in database.sql naast dit bestand.
-    const SUPABASE_URL = "https://umgzbiflchroucznaqxb.supabase.co/rest/v1/";
+    const SUPABASE_URL = "https://umgzbiflchroucznaqxb.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_6HXB5tRAx1XZjIuBzagsww_9DAb__ze";
     let supabaseClient = null;
     let huidigeGebruiker = null;
@@ -1959,25 +1940,62 @@
 
     if (window.supabase && SUPABASE_URL.startsWith("https://") &&
         !SUPABASE_URL.includes("VUL_HIER") && !SUPABASE_ANON_KEY.includes("VUL_HIER")) {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      supabaseClient.auth.getSession().then(({ data }) => verwerkSessie(data.session));
-      supabaseClient.auth.onAuthStateChange((_event, session) => verwerkSessie(session));
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      });
+      supabaseClient.auth.getSession().then(({ data, error }) => {
+        if (error) statusAccount("Sessie controleren mislukt: " + error.message);
+        verwerkSessie(data && data.session, "INITIAL_SESSION");
+      }).catch(error => statusAccount("Inloggen is tijdelijk niet beschikbaar: " + error.message));
+      supabaseClient.auth.onAuthStateChange((event, session) => verwerkSessie(session, event));
     } else {
-      statusAccount("Accountdatabase nog niet gekoppeld. Vul eerst je Supabase-projectgegevens in (uitleg in database.sql).");
+      statusAccount("De accountserver kan niet worden bereikt of de Supabase-projectgegevens ontbreken. Controleer de project-URL en publieke anon/publishable key.");
     }
 
-    function verwerkSessie(session) {
+    function openGewonePagina() {
+      document.body.classList.remove("start", "login-open");
+      home.hidden = true;
+      document.getElementById("loginPage").hidden = true;
+    }
+
+    function toonStartscherm() {
+      document.body.classList.add("start");
+      document.body.classList.remove("login-open");
+      home.hidden = false;
+      home.classList.remove("weg");
+      document.getElementById("loginPage").hidden = true;
+    }
+
+    function openInlogPagina() {
+      document.body.classList.remove("start");
+      document.body.classList.add("login-open");
+      home.hidden = true;
+      document.getElementById("loginPage").hidden = false;
+      document.getElementById("authEmail").focus();
+    }
+
+    function verwerkSessie(session, eventName) {
       huidigeGebruiker = session && session.user ? session.user : null;
       authForm.hidden = !!huidigeGebruiker;
       signedIn.hidden = !huidigeGebruiker;
+      document.getElementById("logoutAppBtn").hidden = !huidigeGebruiker;
       document.getElementById("userEmail").textContent = huidigeGebruiker ? huidigeGebruiker.email : "";
       if (huidigeGebruiker) {
         statusAccount("Ingelogd. Je teksten worden aan dit account gekoppeld.");
+        openGewonePagina();
         if (location.hash === "#opgeslagen") laadOpgeslagenTeksten();
-      } else if (supabaseClient) {
-        statusAccount("Log in om je teksten online op te slaan op al je apparaten.");
+      } else {
+        if (supabaseClient) statusAccount("Log in of maak een account om verder te gaan.");
+        // Alleen bij expliciet uitloggen terug naar het startscherm.
+        if (eventName === "SIGNED_OUT") toonStartscherm();
       }
     }
+
+    // De gebruiker ziet eerst het logo. Een bestaande geldige sessie gaat direct door.
+    const home = document.getElementById("home");
+    document.getElementById("startLogo").addEventListener("click", openInlogPagina);
+    document.getElementById("loginBack").addEventListener("click", toonStartscherm);
+    document.getElementById("loginBackText").addEventListener("click", toonStartscherm);
 
     async function accountActie(actie) {
       if (!supabaseClient) { statusAccount("Koppel eerst Supabase. Zie database.sql."); return; }
@@ -1985,20 +2003,33 @@
       const password = document.getElementById("authPassword").value;
       if (!email || !password) { statusAccount("Vul je e-mailadres en wachtwoord in."); return; }
       statusAccount("Even bezig...");
-      const result = actie === "signup"
-        ? await supabaseClient.auth.signUp({ email, password })
-        : await supabaseClient.auth.signInWithPassword({ email, password });
-      if (result.error) statusAccount(result.error.message);
-      else if (actie === "signup" && !result.data.session)
-        statusAccount("Account aangemaakt. Bevestig je e-mailadres via de mail en log daarna in.");
-      else statusAccount("Gelukt!");
+      try {
+        const result = actie === "signup"
+          ? await supabaseClient.auth.signUp({ email, password })
+          : await supabaseClient.auth.signInWithPassword({ email, password });
+        if (result.error) statusAccount("Inloggen/account maken mislukt: " + result.error.message);
+        else if (actie === "signup" && !result.data.session)
+          statusAccount("Account aangemaakt. Bevestig eerst je e-mailadres via de e-mail. Log daarna hier in.");
+        else if (result.data.session) {
+          statusAccount("Gelukt! Je blijft op dit apparaat ingelogd.");
+          openGewonePagina();
+        }
+      } catch (error) {
+        statusAccount("Er ging iets mis. Controleer je internetverbinding en probeer opnieuw.");
+        console.error("Accountactie:", error);
+      }
     }
 
     document.getElementById("signInBtn").addEventListener("click", () => accountActie("signin"));
     document.getElementById("signUpBtn").addEventListener("click", () => accountActie("signup"));
-    document.getElementById("signOutBtn").addEventListener("click", async () => {
-      if (supabaseClient) await supabaseClient.auth.signOut();
-    });
+    async function uitloggen() {
+      if (supabaseClient) {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) toonMelding("Uitloggen mislukt: " + error.message);
+      }
+    }
+    document.getElementById("signOutBtn").addEventListener("click", uitloggen);
+    document.getElementById("logoutAppBtn").addEventListener("click", uitloggen);
 
     async function slaTekstOp() {
       const inhoud = tekstvak.value.trim();
