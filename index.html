@@ -672,6 +672,82 @@
     }
     .melding.zichtbaar { opacity: 1; transform: translate(-50%, 0); }
 
+    /* ---------- Knop naar de akkoordenbibliotheek ---------- */
+    .bieb-knop {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      margin-top: 14px;
+      min-height: 52px;
+      padding: 12px 18px;
+      border-radius: 24px;
+      font-family: var(--kop);
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .bieb-knop svg { width: 22px; height: 22px; display: block; flex: none; }
+    @media (hover: hover) { .bieb-knop:hover { background: rgba(255, 255, 255, 0.28); } }
+    .bieb-knop:active { transform: scale(0.97); }
+    .bieb-knop:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
+
+    /* ---------- Akkoordenbibliotheek (tweede pagina) ---------- */
+    .bieb { display: none; position: relative; z-index: 1; width: min(1100px, 100%); }
+    body.bieb-open .kaart { display: none; }
+    body.bieb-open .bieb { display: block; animation: verschijn 0.6s ease backwards; }
+    body.start .bieb { display: none !important; }
+    /* Het logo blijft links boven staan, ook als je naar beneden scrolt */
+    body.bieb-open .merk { position: fixed; }
+
+    .bieb h1 { text-shadow: 0 4px 24px rgba(0, 20, 60, 0.4); }
+    .bieb .ondertitel { text-shadow: 0 1px 6px rgba(0, 20, 60, 0.35); max-width: 640px; }
+
+    .ak-titel {
+      margin: 34px 0 14px;
+      font-family: var(--kop);
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: 0.3px;
+      text-shadow: 0 2px 10px rgba(0, 20, 60, 0.4);
+    }
+
+    /* Dezelfde vakjes als de toonhoogte-wielen: 160 x 156 (telefoon 132 hoog, tablet 170 x 168) */
+    .ak-rij {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 160px);
+      gap: clamp(10px, 3vw, 22px);
+      justify-content: center;
+    }
+
+    /* Liquid glass zonder "backdrop-filter": met 200+ vakjes zou de blur een telefoon te zwaar maken.
+       Op deze zachte achtergrond zie je het verschil bijna niet. */
+    .akkoord-blok {
+      height: 156px;
+      border-radius: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 8px 8px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+        0 10px 24px rgba(0, 20, 60, 0.25);
+      color: #fff;
+      text-shadow: 0 1px 4px rgba(0, 20, 60, 0.35);
+    }
+    .akkoord-blok.leeg { background: rgba(255, 255, 255, 0.08); border-style: dashed; }
+    .ak-naam { font-family: var(--kop); font-weight: 800; font-size: 20px; line-height: 1.15; }
+    .ak-alt  { font-size: 12px; line-height: 1.2; min-height: 1.2em; opacity: 0.7; }
+    .akkoord-blok svg { flex: 1; min-height: 0; width: 100%; display: block; margin-top: 2px; }
+
     /* ---------- Telefoon (smal scherm) ---------- */
     @media (max-width: 520px) {
       body {
@@ -715,6 +791,12 @@
       .schakel-spoor { width: 40px; height: 24px; }
       .schakel-bol { width: 18px; height: 18px; }
       .schakel[aria-checked="true"] .schakel-bol { transform: translateX(16px); }
+
+      .bieb-knop { margin-top: 12px; font-size: 15px; }
+      .ak-rij { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .akkoord-blok { height: 132px; border-radius: 26px; padding: 8px 6px 6px; }
+      .ak-naam { font-size: 17px; }
+      .ak-titel { font-size: 18px; }
     }
 
     /* ---------- Tablet / iPad ---------- */
@@ -722,6 +804,9 @@
       .kaart { width: min(720px, 100%); padding: 36px; }
       textarea { height: 210px; font-size: 18px; }
       .wiel { max-width: 170px; height: 168px; }
+
+      .ak-rij { grid-template-columns: repeat(auto-fill, 170px); }
+      .akkoord-blok { height: 168px; }
     }
 
     /* ---------- Telefoon of tablet liggend (weinig hoogte) ---------- */
@@ -733,7 +818,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      body, .bol, .noot, .eq span, .home-logo, .home-tip, .kaart { animation: none !important; }
+      body, .bol, .noot, .eq span, .home-logo, .home-tip, .kaart, .bieb { animation: none !important; }
     }
   </style>
 </head>
@@ -773,7 +858,7 @@
 
   <div class="melding glass" id="melding" role="status" aria-live="polite"></div>
 
-  <!-- Logo links boven: klik erop om alles terug te zetten -->
+  <!-- Logo links boven: op de gewone pagina zet je er alles mee terug, in de bibliotheek ga je ermee terug naar de gewone pagina -->
   <a class="merk" id="logo" href="./" aria-label="KeyChanger, alles terugzetten" title="Alles terugzetten">
     <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
@@ -855,15 +940,31 @@
       <button class="oke glass" id="oke" type="button">Oké</button>
     </div>
 
+    <button class="bieb-knop glass" id="biebKnop" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+      <span>Akkoordenbibliotheek</span>
+    </button>
+
     <p class="tip">Sleep of veeg met je vinger of muis omhoog en omlaag over een letter om de toonhoogte te kiezen (het muiswiel werkt ook). Druk daarna op Oké. Met Shorter houd je alleen de gewone akkoorden over.</p>
   </main>
+
+  <!-- Tweede pagina: de akkoordenbibliotheek. Wordt pas gevuld als je erop klikt -->
+  <section class="bieb" id="bieb" aria-label="Akkoordenbibliotheek">
+    <h1>Akkoordenbibliotheek</h1>
+    <p class="ondertitel">Zo speel je de akkoorden op gitaar. Lege vakjes met een stippellijn zijn nog niet ingevuld. Tik op het logo om terug te gaan.</p>
+    <div id="biebInhoud"></div>
+  </section>
 
   <script>
     // ---------- Toonhoogtes ----------
     // Alle toonhoogtes in volgorde: C, C#, D, D#, E, F, F#, G, G#, A, A#, B
-    const noten = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const noten = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
+          // Dezelfde toonhoogtes, maar met mollen. Handig in toonsoorten als F (Bb) of Eb
+          notenBes = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
     // Waar elke letter staat in die lijst
     const basis = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+    // Toonsoorten waarin je gewoonlijk mollen schrijft: Db, Eb, F, Ab, Bb
+    const BES_TOONSOORTEN = [1, 3, 5, 8, 10];
 
     const tekstvak = document.getElementById("tekst");
     const capoEl = document.getElementById("capo");
@@ -873,12 +974,13 @@
     // Positie in de lijst (0 = C ... 11 = B)
     const stand = { orig: 0, nieuw: 0 };
 
-    // Hoeveel stappen de tekst al is opgeschoven (zodat een tweede keer Oké niet dubbel schuift)
-    let toegepast = 0;
+    // Zolang je de nieuwe toonhoogte nog niet zelf hebt gekozen, loopt hij mee met de originele.
+    // Zo gebeurt er niets met je tekst als je alleen de originele toonhoogte instelt.
+    let nieuwGekozen = false;
 
-    // De toonhoogtes zoals ze stonden bij de vorige keer Oké
-    let vorigeOrig = 0;
-    let vorigeNieuw = 0;
+    // Hoeveel halve tonen de tekst al is opgeschoven ten opzichte van wat je typte of plakte
+    // (zodat een tweede keer Oké niet dubbel schuift)
+    let toegepast = 0;
 
     // Shorter: staat de schakelaar aan, dan onthouden we de volledige akkoorden (om terug te kunnen zetten)
     // en de ingekorte tekst die we er zelf van gemaakt hebben
@@ -896,10 +998,16 @@
 
     // Zoekt alle losse akkoorden in de tekst, met een hoofdletter of een kleine letter
     // (A, a, Dm, dm, G7, C#, f#, Bb, C/G, c/g) en schuift ze op.
-    // Positief = omhoog, negatief = omlaag.
+    // Positief = omhoog, negatief = omlaag. Voorbeeld: stappen = -2 -> D wordt C, G wordt F, Em wordt Dm.
     // Letters die in een woord zitten ("Dit", "Ben", "de", "e-mail") blijven met rust:
     // een akkoord moet los staan, dus voor en na het akkoord mag geen letter of cijfer staan.
-    function transponeer(tekst, stappen) {
+    //
+    // metBes: schrijf de nieuwe akkoorden met mollen (Bb) in plaats van kruisen (A#).
+    // Stond er in jouw tekst al een # of een b, dan blijft die soort staan.
+    //
+    // Staan er na het akkoord meerdere spaties (akkoorden boven een songtekst), dan wordt de ruimte
+    // aangepast als het akkoord langer of korter wordt, zodat de tekst eronder netjes uitgelijnd blijft.
+    function transponeer(tekst, stappen, metBes) {
       const s = ((stappen % 12) + 12) % 12;
       if (s === 0) return tekst;
 
@@ -909,15 +1017,40 @@
       function verschuif(letter, teken) {
         const isHoofdletter = letter === letter.toUpperCase();
         const plek = basis[letter.toUpperCase()] + (teken === "#" ? 1 : teken === "b" ? -1 : 0);
-        const nieuw = noten[(((plek + s) % 12) + 12) % 12];
-        return isHoofdletter ? nieuw : nieuw.toLowerCase();
+        const nummer = (((plek + s) % 12) + 12) % 12;
+        const bes = teken === "b" ? true : teken === "#" ? false : !!metBes;
+        const naam = (bes ? notenBes : noten)[nummer];
+        return isHoofdletter ? naam : naam.toLowerCase();
       }
 
-      return tekst.replace(patroon, function (_, voor, letter, teken, uitbreiding, bas, basTeken) {
-        let uit = voor + verschuif(letter, teken) + uitbreiding;
-        if (bas) uit += "/" + verschuif(bas, basTeken);
-        return uit;
-      });
+      let uit = "";
+      let pos = 0;           // tot hier is de oorspronkelijke tekst al verwerkt
+      let m;
+      while ((m = patroon.exec(tekst)) !== null) {
+        const heel = m[0], voor = m[1], letter = m[2], teken = m[3], uitbreiding = m[4], bas = m[5], basTeken = m[6];
+        let nieuwAkkoord = verschuif(letter, teken) + uitbreiding;
+        if (bas) nieuwAkkoord += "/" + verschuif(bas, basTeken);
+        const oudAkkoord = heel.slice(voor.length);
+        const eind = m.index + heel.length;
+
+        uit += tekst.slice(pos, m.index) + voor + nieuwAkkoord;
+        pos = eind;
+
+        // Uitlijning bewaren: tel de spaties direct na het akkoord
+        const verschil = nieuwAkkoord.length - oudAkkoord.length;
+        if (verschil !== 0) {
+          let spaties = 0;
+          while (tekst.charAt(eind + spaties) === " ") spaties++;
+          if (verschil > 0) {
+            // langer akkoord: haal spaties weg, maar laat er minstens één staan
+            pos = eind + Math.min(verschil, Math.max(spaties - 1, 0));
+          } else if (spaties > 0) {
+            // korter akkoord: vul aan met spaties
+            uit += " ".repeat(-verschil);
+          }
+        }
+      }
+      return uit + tekst.slice(pos);
     }
 
     // Shorter: haalt alles naast het akkoord weg. Dus Cmaj7 -> C, G7 -> G, Dsus4 -> D, Cadd9 -> C,
@@ -943,7 +1076,8 @@
       return Math.abs(verschil);
     }
 
-    // Hoeveel halve tonen de akkoorden opschuiven: precies het verschil tussen nieuw en origineel
+    // Hoeveel halve tonen de akkoorden opschuiven: precies het verschil tussen nieuw en origineel.
+    // Orig G (7) en nieuw F (5): 5 - 7 = -2, dus alle akkoorden twee halve tonen omlaag (D wordt C).
     function gewensteVerschuiving() {
       return stand.nieuw - stand.orig;
     }
@@ -966,6 +1100,11 @@
       const w = Math.min(11, Math.max(0, waarde));
       if (w === stand[wie]) return;
       stand[wie] = w;
+      if (wie === "nieuw") {
+        nieuwGekozen = true;
+      } else if (!nieuwGekozen) {
+        stand.nieuw = w;          // de nieuwe toonhoogte loopt mee, het verschil blijft 0
+      }
       toon();
       pulseer();
       if (navigator.vibrate) navigator.vibrate(8);
@@ -1027,25 +1166,18 @@
     maakWiel(document.getElementById("wiel-nieuw"), "nieuw");
 
     // ---------- Tekst aanpassen: pas na het langsvliegen van het logo ----------
+    // De tekst wordt altijd verschoven met het verschil tussen nieuw en origineel.
+    // "toegepast" houdt bij hoeveel de tekst al is verschoven, dus tweemaal op Oké doet niets extra's.
     function pasTekstAan() {
-      // Is alleen de originele toonhoogte veranderd? Dan gebeurt er niets met de tekst.
-      // We onthouden wel dat het nieuwe verschil nu "het nulpunt" is, zodat een volgende
-      // verandering van de nieuwe toonhoogte alleen met dat verschil meeschuift.
-      if (stand.orig !== vorigeOrig && stand.nieuw === vorigeNieuw) {
-        toegepast = gewensteVerschuiving();
-        vorigeOrig = stand.orig;
-        vorigeNieuw = stand.nieuw;
-        return;
-      }
-
       const gewenst = gewensteVerschuiving();
       const stappen = gewenst - toegepast;
+      const metBes = BES_TOONSOORTEN.indexOf(stand.nieuw) !== -1;
       // Heb je de ingekorte tekst zelf niet aangepast? Dan schuiven we de volledige versie mee, zodat Shorter uit nog klopt
       const ongewijzigd = shorter && volleTekst !== null && tekstvak.value === verkortTekst;
-      let nieuw = transponeer(tekstvak.value, stappen);
+      let nieuw = transponeer(tekstvak.value, stappen, metBes);
       if (shorter) {
         if (ongewijzigd) {
-          volleTekst = transponeer(volleTekst, stappen);
+          volleTekst = transponeer(volleTekst, stappen, metBes);
         } else {
           nieuw = verkort(nieuw);        // zelf getypte of geplakte akkoorden ook inkorten
           volleTekst = null;
@@ -1054,21 +1186,20 @@
       }
       tekstvak.value = nieuw;
       toegepast = gewenst;
-      vorigeOrig = stand.orig;
-      vorigeNieuw = stand.nieuw;
       tekstvak.classList.remove("verlicht");
       void tekstvak.offsetWidth;
       tekstvak.classList.add("verlicht");
     }
 
-    // Plak je een nieuwe tekst over de oude heen (of begin je opnieuw), dan telt die weer als origineel
+    // Plak je een nieuwe tekst over de oude heen (of maak je het tekstvak leeg), dan telt die weer als origineel:
+    // de akkoorden die je plakt staan in de originele toonhoogte en zijn dus nog niet opgeschoven
     tekstvak.addEventListener("paste", function () {
       if (tekstvak.selectionStart === 0 && tekstvak.selectionEnd === tekstvak.value.length) {
-        toegepast = gewensteVerschuiving();
+        toegepast = 0;
       }
     });
     tekstvak.addEventListener("input", function () {
-      if (tekstvak.value === "") toegepast = gewensteVerschuiving();
+      if (tekstvak.value === "") toegepast = 0;
     });
 
     let vliegt = false;
@@ -1142,15 +1273,19 @@
       };
     }
 
-    // ---------- Klik op het logo: alles terug naar het begin ----------
+    // ---------- Klik op het logo ----------
+    // In de bibliotheek: terug naar de gewone pagina. Op de gewone pagina: alles terug naar het begin.
     logo.addEventListener("click", function (e) {
       e.preventDefault();
+      if (document.body.classList.contains("bieb-open")) {
+        sluitBieb();
+        return;
+      }
       if (vliegt) return;
       stand.orig = 0;
       stand.nieuw = 0;
+      nieuwGekozen = false;
       toegepast = 0;
-      vorigeOrig = 0;
-      vorigeNieuw = 0;
       resetShorter();
       tekstvak.value = "";
       toon();
@@ -1442,7 +1577,9 @@
     });
 
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && tekstVolOpen()) sluitTekstVol();
+      if (e.key !== "Escape") return;
+      if (tekstVolOpen()) sluitTekstVol();
+      else if (document.body.classList.contains("bieb-open")) sluitBieb();
     });
 
     // Eén plek die reageert als het volledige scherm aan of uit gaat
@@ -1491,7 +1628,254 @@
       });
     });
 
+    // =====================================================================
+    //  AKKOORDENBIBLIOTHEEK
+    // =====================================================================
+    //
+    // Hoe komen alle akkoorden in de vakjes? Op drie manieren, in deze volgorde:
+    //
+    //  1. VINGERZETTINGEN hieronder: jouw eigen lijst. Een akkoord dat hier staat, wint altijd.
+    //     Schrijf de zes snaren van de dikke E (laag) naar de dunne e (hoog):
+    //        x = niet spelen, 0 = open snaar, een cijfer = fret.
+    //     Voorbeeld C = "x32010". Zit er een fret boven 9 bij? Zet er streepjes tussen: "x-10-12-12-12-10".
+    //     Je mag kruisen of mollen gebruiken in de naam: "C#m7" en "Dbm7" zijn hetzelfde akkoord.
+    //
+    //  2. VORMEN: één vaste vorm per soort akkoord (majeur, mineur, 7, ...), met de grondtoon op de
+    //     dikke E-snaar ("e") of op de A-snaar ("a"). Een vorm schuift gewoon over de hals, dus één vorm
+    //     levert direct alle 12 akkoorden op (de barré-akkoorden). Per akkoord kiest de code de vorm die
+    //     het laagst op de hals ligt. Een nieuwe soort akkoord toevoegen = één regel bij VORMEN en
+    //     één regel bij KWALITEITEN.
+    //
+    //  3. Staat een akkoord nergens? Dan blijft het vakje leeg (stippellijn), tot jij het invult bij 1.
+
+    const VINGERZETTINGEN = {
+      // Open akkoorden (makkelijker dan de barré-vorm)
+      "C": "x32010",   "D": "xx0232",   "G": "320003",
+      "C7": "x32310",  "D7": "xx0212",  "E7": "020100", "G7": "320001", "A7": "x02020", "B7": "x21202",
+      "Cmaj7": "x32000", "Dmaj7": "xx0222", "Emaj7": "021100", "Fmaj7": "xx3210", "Gmaj7": "320002", "Amaj7": "x02120",
+      "Dm": "xx0231",  "Dm7": "xx0211", "Am7": "x02010",
+      "Dsus2": "xx0230", "Dsus4": "xx0233", "Asus2": "x02200", "Asus4": "x02230", "Esus4": "022200",
+      "Cadd9": "x32030", "G6": "320000"
+      // Eigen akkoord toevoegen? Zet hier een regel bij, bijvoorbeeld:  "C#dim7": "x4535x",
+    };
+
+    // De vormen. Elk getal is "hoeveel frets boven de grondtoon" en null = niet spelen.
+    // Vorm "e": grondtoon op de dikke E-snaar. Vorm "a": grondtoon op de A-snaar (de E-snaar blijft dan stil).
+    const VORMEN = {
+      "":      { e: [0, 2, 2, 1, 0, 0],       a: [null, 0, 2, 2, 2, 0] },
+      "m":     { e: [0, 2, 2, 0, 0, 0],       a: [null, 0, 2, 2, 1, 0] },
+      "7":     { e: [0, 2, 0, 1, 0, 0],       a: [null, 0, 2, 0, 2, 0] },
+      "m7":    { e: [0, 2, 0, 0, 0, 0],       a: [null, 0, 2, 0, 1, 0] },
+      "maj7":  { e: [0, 2, 1, 1, 0, 0],       a: [null, 0, 2, 1, 2, 0] },
+      "sus2":  { e: [0, 2, 4, 4, 0, 0],       a: [null, 0, 2, 2, 0, 0] },
+      "sus4":  { e: [0, 2, 2, 2, 0, 0],       a: [null, 0, 2, 2, 3, 0] },
+      "6":     { e: [0, 2, 2, 1, 2, 0],       a: [null, 0, 2, 2, 2, 2] },
+      "m6":    { e: [0, 2, 2, 0, 2, 0],       a: [null, 0, 2, 2, 1, 2] },
+      "9":     { e: [0, 2, 0, 1, 0, 2],       a: [null, 0, 2, 4, 2, 3] },
+      "add9":  { e: [0, 2, 2, 1, 0, 2],       a: [null, 0, 2, 4, 2, 0] },
+      "dim":   {                              a: [null, 0, 1, 2, 1, null] },
+      "m7b5":  {                              a: [null, 0, 1, 0, 1, null] },
+      "aug":   { e: [0, 3, 2, 1, 1, 0],       a: [null, 0, 3, 2, 2, 1] },
+      "7sus4": { e: [0, 2, 0, 2, 0, 0],       a: [null, 0, 2, 0, 3, 0] }
+    };
+
+    // De rijen op de pagina. Soorten zonder vorm (de laatste vier) blijven nog leeg.
+    const KWALITEITEN = [
+      { sfx: "",       titel: "Majeur" },
+      { sfx: "m",      titel: "Mineur (m)" },
+      { sfx: "7",      titel: "Dominant 7 (7)" },
+      { sfx: "m7",     titel: "Mineur 7 (m7)" },
+      { sfx: "maj7",   titel: "Majeur 7 (maj7)" },
+      { sfx: "sus2",   titel: "Sus2" },
+      { sfx: "sus4",   titel: "Sus4" },
+      { sfx: "6",      titel: "6" },
+      { sfx: "m6",     titel: "Mineur 6 (m6)" },
+      { sfx: "9",      titel: "9" },
+      { sfx: "add9",   titel: "Add9" },
+      { sfx: "dim",    titel: "Verminderd (dim)" },
+      { sfx: "m7b5",   titel: "Halfverminderd (m7b5)" },
+      { sfx: "aug",    titel: "Overmatig (aug)" },
+      { sfx: "7sus4",  titel: "7sus4" },
+      { sfx: "dim7",   titel: "Dim7" },
+      { sfx: "maj9",   titel: "Maj9" },
+      { sfx: "m9",     titel: "Mineur 9 (m9)" },
+      { sfx: "m(maj7)", titel: "Mineur majeur 7 (m(maj7))" }
+    ];
+
+    // Naam van de toonhoogte met mol, voor onder de grote naam (leeg als hij geen kruis of mol heeft)
+    const ALT_WORTELS = ["", "Db", "", "Eb", "", "", "Gb", "", "Ab", "", "Bb", ""];
+
+    // "Dbm7" -> "C#m7", zodat kruisen en mollen in VINGERZETTINGEN door elkaar mogen
+    function sleutel(naam) {
+      const m = /^([A-G])([#b]?)(.*)$/.exec(naam);
+      if (!m) return naam;
+      const nummer = (basis[m[1]] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0) + 12) % 12;
+      return noten[nummer] + m[3];
+    }
+
+    // "x32010" -> [null,3,2,0,1,0]
+    function leesVingers(tekst) {
+      const metScheiding = /[-,\s]/.test(tekst);
+      const delen = metScheiding ? tekst.split(/[-,\s]+/) : tekst.split("");
+      return delen.map(function (d) {
+        if (d === "x" || d === "X") return null;
+        return parseInt(d, metScheiding ? 10 : 36);       // zonder streepjes mag a = 10, b = 11, ...
+      });
+    }
+
+    // Geeft { vingers: [6 getallen of null], barre: {...} of null }, of null als het akkoord onbekend is
+    function zoekAkkoord(wortel, sfx, eigen) {
+      const eigenTekst = eigen[noten[wortel] + sfx];
+      if (eigenTekst) {
+        const v = leesVingers(eigenTekst);
+        if (v.length === 6) return { vingers: v, barre: null };
+      }
+
+      const vorm = VORMEN[sfx];
+      if (!vorm) return null;
+
+      // Kies de vorm die het laagst op de hals ligt (E-snaar = toon 4, A-snaar = toon 9)
+      let kies = null;
+      [["e", 4], ["a", 9]].forEach(function (k) {
+        const rel = vorm[k[0]];
+        if (!rel) return;
+        const pos = (((wortel - k[1]) % 12) + 12) % 12;
+        if (!kies || pos < kies.pos) kies = { pos: pos, rel: rel };
+      });
+      if (!kies) return null;
+
+      const vingers = kies.rel.map(function (r) { return r === null ? null : r + kies.pos; });
+
+      // Zit de vorm hoger dan de open snaren? Dan ligt er een vinger als "barré" over de hals
+      let barre = null;
+      if (kies.pos > 0) {
+        const nullen = [];
+        kies.rel.forEach(function (r, i) { if (r === 0) nullen.push(i); });
+        if (nullen.length >= 2) barre = { fret: kies.pos, van: nullen[0], tot: nullen[nullen.length - 1] };
+      }
+      return { vingers: vingers, barre: barre };
+    }
+
+    // Tekent het akkoorddiagram als SVG. Zonder akkoord: een leeg raster.
+    function tekenAkkoord(akkoord) {
+      const X0 = 16, DX = 8, Y0 = 16, DY = 10, RIJEN = 5;
+      const breedte = 5 * DX;
+      const vingers = akkoord ? akkoord.vingers : null;
+      const barre = akkoord ? akkoord.barre : null;
+
+      // Past alles op de eerste vijf frets? Anders beginnen we bij de laagste fret en zetten het nummer ernaast
+      const gedrukt = vingers ? vingers.filter(function (f) { return f !== null && f > 0; }) : [];
+      let beginFret = 1;
+      if (gedrukt.length && Math.max.apply(null, gedrukt) > RIJEN) beginFret = Math.min.apply(null, gedrukt);
+
+      let s = '<svg viewBox="0 0 68 76" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
+      s += '<g stroke="currentColor" stroke-width="1" stroke-linecap="round" fill="none" opacity="' + (vingers ? 0.85 : 0.3) + '">';
+      for (let i = 0; i < 6; i++) {
+        s += '<line x1="' + (X0 + i * DX) + '" y1="' + Y0 + '" x2="' + (X0 + i * DX) + '" y2="' + (Y0 + RIJEN * DY) + '"/>';
+      }
+      for (let j = 0; j <= RIJEN; j++) {
+        s += '<line x1="' + X0 + '" y1="' + (Y0 + j * DY) + '" x2="' + (X0 + breedte) + '" y2="' + (Y0 + j * DY) + '"/>';
+      }
+      s += '</g>';
+      if (!vingers) return s + '</svg>';
+
+      // Zadel (dikke streep bovenaan) of het fretnummer ernaast
+      if (beginFret === 1) {
+        s += '<rect x="' + (X0 - 0.5) + '" y="' + (Y0 - 2.2) + '" width="' + (breedte + 1) + '" height="3" rx="1" fill="currentColor"/>';
+      } else {
+        s += '<text x="' + (X0 - 6) + '" y="' + (Y0 + DY / 2 + 3) + '" text-anchor="end" font-size="9" font-weight="800" fill="currentColor" font-family="Sora, Arial, sans-serif">' + beginFret + '</text>';
+      }
+
+      // Boven het zadel: kruisje (niet spelen) of rondje (open snaar)
+      vingers.forEach(function (f, i) {
+        const x = X0 + i * DX;
+        if (f === null) {
+          s += '<path d="M' + (x - 2.4) + ' 5.6L' + (x + 2.4) + ' 10.4M' + (x + 2.4) + ' 5.6L' + (x - 2.4) + ' 10.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/>';
+        } else if (f === 0) {
+          s += '<circle cx="' + x + '" cy="8" r="2.6" stroke="currentColor" stroke-width="1.2" fill="none"/>';
+        }
+      });
+
+      // Barré: één strook over meerdere snaren
+      if (barre && barre.fret >= beginFret && barre.fret < beginFret + RIJEN) {
+        const cy = Y0 + (barre.fret - beginFret) * DY + DY / 2;
+        s += '<rect x="' + (X0 + barre.van * DX - 3.6) + '" y="' + (cy - 3.4) + '" width="' + ((barre.tot - barre.van) * DX + 7.2) + '" height="6.8" rx="3.4" fill="currentColor"/>';
+      }
+
+      // Vingers
+      vingers.forEach(function (f, i) {
+        if (f === null || f <= 0 || f < beginFret || f >= beginFret + RIJEN) return;
+        if (barre && f === barre.fret && i >= barre.van && i <= barre.tot) return;   // zit al in de barré-strook
+        const cy = Y0 + (f - beginFret) * DY + DY / 2;
+        s += '<circle cx="' + (X0 + i * DX) + '" cy="' + cy + '" r="3.6" fill="currentColor"/>';
+      });
+
+      return s + '</svg>';
+    }
+
+    // Bouwt alle vakjes. Gebeurt één keer, pas als je de bibliotheek opent.
+    let biebGebouwd = false;
+    function bouwBieb() {
+      if (biebGebouwd) return;
+      biebGebouwd = true;
+
+      const eigen = {};
+      Object.keys(VINGERZETTINGEN).forEach(function (naam) { eigen[sleutel(naam)] = VINGERZETTINGEN[naam]; });
+
+      let html = "";
+      KWALITEITEN.forEach(function (q) {
+        html += '<h2 class="ak-titel">' + q.titel + '</h2><div class="ak-rij" role="list">';
+        for (let w = 0; w < 12; w++) {
+          const naam = noten[w] + q.sfx;
+          const alt = ALT_WORTELS[w] ? ALT_WORTELS[w] + q.sfx : "";
+          const akkoord = zoekAkkoord(w, q.sfx, eigen);
+          html += '<div class="akkoord-blok' + (akkoord ? "" : " leeg") + '" role="listitem" title="' +
+                  (akkoord ? naam : naam + ": nog niet ingevuld") + '">' +
+                  '<span class="ak-naam">' + naam + '</span>' +
+                  '<span class="ak-alt">' + alt + '</span>' +
+                  tekenAkkoord(akkoord) +
+                  '</div>';
+        }
+        html += '</div>';
+      });
+      document.getElementById("biebInhoud").innerHTML = html;
+    }
+
+    // ---------- Naar de bibliotheek en terug ----------
+    // De bibliotheek is "pagina" #akkoorden: de terugknop van je browser of telefoon werkt dus gewoon.
+    let biebViaKnop = false;
+
+    function pasPaginaAan() {
+      const open = location.hash === "#akkoorden";
+      document.body.classList.toggle("bieb-open", open);
+      if (open) bouwBieb();
+      const titel = open ? "Terug naar KeyChanger" : "Alles terugzetten";
+      logo.title = titel;
+      logo.setAttribute("aria-label", "KeyChanger, " + (open ? "terug naar de gewone pagina" : "alles terugzetten"));
+      window.scrollTo(0, 0);
+    }
+
+    function openBieb() {
+      biebViaKnop = true;
+      location.hash = "akkoorden";           // zet de pagina om via "hashchange"
+    }
+
+    function sluitBieb() {
+      if (biebViaKnop) {
+        biebViaKnop = false;
+        history.back();                      // terug naar de gewone pagina, de tekst blijft staan
+      } else {
+        // Direct op de bibliotheek binnengekomen (bijvoorbeeld via een link): er is niets om naar terug te gaan
+        try { history.replaceState(null, "", location.pathname + location.search); } catch (fout) { location.hash = ""; }
+        pasPaginaAan();
+      }
+    }
+
+    document.getElementById("biebKnop").addEventListener("click", openBieb);
+    window.addEventListener("hashchange", pasPaginaAan);
+
     toon();
+    pasPaginaAan();
   </script>
 </body>
 </html>
