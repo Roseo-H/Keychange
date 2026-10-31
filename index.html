@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de pagina gebruikt het hele scherm van een iPhone/iPad, de code houdt zelf rekening met de notch en de balk onderaan -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0a2a6b">
+  <meta name="theme-color" content="#0b5ed7">
   <!-- Zet je de site via "Zet op beginscherm" op je iPhone/iPad of Android, dan opent hij helemaal schermvullend (zonder browserbalk) -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -800,65 +800,6 @@
     .saved-card button { padding:9px 12px; border-radius:12px; }
     .saved-empty { text-align:center; opacity:.9; padding:28px 12px; }
     @media(max-width:520px) { .account-row button { flex:1; } }
-  
-    /* ---------- Extra scherm- en balkaanpassing (telefoon, tablet en laptop) ---------- */
-    html { min-height: 100%; background: #0a2a6b; }
-    body {
-      width: 100%;
-      min-height: 100vh;
-      min-height: 100svh;
-      min-height: 100dvh;
-      overscroll-behavior-x: none;
-    }
-    /* Op kleine schermen minder lege ruimte boven en onder de inhoud. */
-    @media (max-width: 520px) {
-      body:not(.start) {
-        padding-top: calc(env(safe-area-inset-top, 0px) + 68px);
-        padding-right: calc(env(safe-area-inset-right, 0px) + 10px);
-        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-        padding-left: calc(env(safe-area-inset-left, 0px) + 10px);
-        align-items: flex-start;
-      }
-      .kaart, .bieb, .saved-page { max-width: 100%; min-width: 0; }
-      .kaart { margin-inline: auto; }
-      .app-heading { min-width: 0; flex-wrap: wrap; }
-      .app-heading h1 { min-width: 0; overflow-wrap: anywhere; }
-      .acties { min-width: 0; }
-      .schakel { padding-inline: 10px; }
-      .tekst-acties { min-width: 0; }
-      .tekst-acties button { min-width: 0; }
-      .saved-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
-    }
-    /* Tablets: benut de breedte, maar houd de inhoud leesbaar. */
-    @media (min-width: 700px) and (max-width: 1100px) {
-      body:not(.start) { padding-inline: max(24px, env(safe-area-inset-left, 0px)); }
-      .kaart { width: min(760px, 100%); }
-      .bieb { width: min(1000px, 100%); }
-    }
-    /* Brede laptops en desktops: de bibliotheek mag breder worden, de hoofdkaart niet. */
-    @media (min-width: 1101px) {
-      body:not(.start) { padding-inline: 32px; }
-      .kaart { width: min(760px, 100%); }
-      .bieb { width: min(1180px, 100%); }
-    }
-    /* Lage schermen in liggende stand: voorkom dat de kaart verticaal wordt afgeknipt. */
-    @media (max-height: 650px) and (orientation: landscape) {
-      body:not(.start) {
-        align-items: flex-start;
-        padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
-        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
-      }
-      .kaart { margin-block: 0; }
-      .merk { top: calc(env(safe-area-inset-top, 0px) + 10px); }
-      .eq { display: none; }
-      .ondertitel { margin-bottom: 10px; }
-      textarea { height: clamp(90px, 24vh, 150px); }
-      .keuzes, .capo, .acties { margin-top: 12px; }
-    }
-    /* Voorkom horizontaal schuiven door brede inhoud op elk apparaat. */
-    img, svg, textarea, input, button { max-width: 100%; }
-    .kaart, .bieb, .saved-page, .login-card { min-width: 0; }
-
   </style>
 </head>
 <body class="start">
