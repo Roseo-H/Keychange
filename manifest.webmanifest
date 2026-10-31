@@ -1,1 +1,17 @@
-
+{
+  "name": "KeyChanger",
+  "short_name": "KeyChanger",
+  "description": "Zet akkoorden in een andere toonsoort en zie meteen welke capo je nodig hebt.",
+  "lang": "nl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a2a6b",
+  "theme_color": "#0b5ed7",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

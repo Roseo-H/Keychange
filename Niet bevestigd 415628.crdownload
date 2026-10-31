@@ -1,0 +1,31 @@
+// KeyChanger service worker: laat de app ook zonder internet openen.
+// Verander het nummer hieronder (v1 -> v2) als je de site aanpast en wilt dat iedereen meteen de nieuwe versie krijgt.
+const CACHE = "keychanger-v1";
+const BESTANDEN = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
+
+self.addEventListener("install", (e) => {
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(BESTANDEN)).then(() => self.skipWaiting()));
+});
+
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
+    caches.keys()
+      .then((namen) => Promise.all(namen.filter((n) => n !== CACHE).map((n) => caches.delete(n))))
+      .then(() => self.clients.claim())
+  );
+});
+
+// Eerst internet (dan krijg je altijd de nieuwste versie), lukt dat niet dan het bewaarde bestand.
+// Alleen bestanden van de site zelf: inloggen en de database (Supabase) gaan nooit via de cache.
+self.addEventListener("fetch", (e) => {
+  const req = e.request;
+  if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
+  e.respondWith(
+    fetch(req)
+      .then((res) => {
+        if (res.ok) { const kopie = res.clone(); caches.open(CACHE).then((c) => c.put(req, kopie)); }
+        return res;
+      })
+      .catch(() => caches.match(req).then((r) => r || caches.match("./index.html")))
+  );
+});
