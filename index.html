@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <!-- viewport-fit=cover: de pagina gebruikt het hele scherm van een iPhone/iPad, de code houdt zelf rekening met de notch en de balk onderaan -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0b5ed7">
   <!-- Zet je de site via "Zet op beginscherm" op je iPhone/iPad of Android, dan opent hij helemaal schermvullend (zonder browserbalk) -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -30,6 +29,13 @@
     * { box-sizing: border-box; }
     /* Voorkomt dat iPhone/iPad de letters groter maakt als je het scherm draait */
     html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    /* Het blauw-groene verloop staat op <html>, zodat het het hele scherm vult, ook onder de statusbalk en de balk onderaan */
+    html {
+      min-height: 100%;
+      background: #0b8fb4 linear-gradient(135deg, #0a2a6b, #0b5ed7, #07b0a8, #2fd27a, #0b5ed7, #0a2a6b);
+      background-size: 400% 400%;
+      animation: verloop 22s ease-in-out infinite;
+    }
     body {
       margin: 0;
       min-height: 100vh;
@@ -47,9 +53,7 @@
       color: #fff;
       overflow-x: hidden;
       /* Blauw -> groen verloop dat rustig beweegt */
-      background: linear-gradient(135deg, #0a2a6b, #0b5ed7, #07b0a8, #2fd27a, #0b5ed7, #0a2a6b);
-      background-size: 400% 400%;
-      animation: verloop 22s ease-in-out infinite;
+      background: transparent;
     }
     @keyframes verloop {
       0%   { background-position: 0% 50%; }
@@ -517,7 +521,7 @@
         left: 50%;
         transform: translateX(-50%);
         bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-        width: min(440px, calc(100% - 170px));
+        width: min(440px, calc(100% - 260px));
         padding: 10px 20px;
         border-radius: 22px;
         font-family: var(--kop);
@@ -629,7 +633,7 @@
       position: fixed;
       left: 50%;
       bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
-      z-index: 80;
+      z-index: 300;
       max-width: min(92vw, 460px);
       padding: 12px 18px;
       border-radius: 18px;
@@ -641,6 +645,8 @@
       transition: opacity 0.3s, transform 0.3s;
     }
     .melding.zichtbaar { opacity: 1; transform: translate(-50%, 0); }
+    /* Over het witte schermvullende tekstvak is wit-op-glas onleesbaar: daar krijgt het berichtje een egaal blauwe kleur */
+    body.tekst-vol .melding { background: #0a2a6b; border-color: #0a2a6b; -webkit-backdrop-filter: none; backdrop-filter: none; }
     /* ---------- Knop naar de akkoordenbibliotheek ---------- */
     .bieb-knop {
       display: flex;
@@ -772,7 +778,7 @@
       textarea { height: 110px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      body, .bol, .eq span, .home-logo, .home-tip, .kaart, .bieb { animation: none !important; }
+      html, body, .bol, .eq span, .home-logo, .home-tip, .kaart, .bieb { animation: none !important; }
     }
     /* ---------- Accounts en opgeslagen teksten ---------- */
     .account-pane { margin: 0 0 18px; padding: 14px; border-radius: 20px; }
@@ -792,7 +798,67 @@
     body.saved-open .saved-page { display:block; animation:verschijn .5s ease backwards; }
     body.saved-open .merk { position:fixed; }
     .saved-page h1 { text-shadow:0 4px 24px rgba(0,20,60,.4); }
-    .saved-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; margin-top:22px; }
+    body.saved-open { align-items: flex-start; }
+    .saved-list { margin-top: 22px; }
+    .saved-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; }
+    .letter-kop { margin: 28px 0 12px; font-family: var(--kop); font-weight: 800; font-size: 26px; text-shadow: 0 2px 10px rgba(0,20,60,.4); }
+    .letter-kop:first-child { margin-top: 0; }
+    .saved-card small { display:block; margin-bottom:8px; opacity:.85; }
+    .save-knop.gelukt { background: linear-gradient(135deg, #38bdf8, #4ade80); }
+    .tekstdoos.vol .save-knop.gelukt { color: #0a8f5a; }
+
+    /* Sorteerkeuze rechtsboven (alleen op de pagina Opgeslagen teksten) */
+    .sorteer { display: none; position: fixed; z-index: 8;
+      top: calc(env(safe-area-inset-top, 0px) + 22px); right: calc(env(safe-area-inset-right, 0px) + 16px); }
+    body.saved-open .sorteer { display: block; }
+    body.tekst-vol .sorteer { display: none; }
+    .sorteer-knop { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px 0 18px; border-radius: 16px;
+      font-family: var(--kop); font-weight: 800; font-size: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: background .2s, transform .15s; }
+    .sorteer-knop svg { width: 18px; height: 18px; flex: none; transition: transform .2s; }
+    .sorteer-knop[aria-expanded="true"] svg { transform: rotate(180deg); }
+    @media (hover: hover) { .sorteer-knop:hover { background: rgba(255,255,255,.28); } }
+    .sorteer-knop:active { transform: scale(.97); }
+    .sorteer-knop:focus-visible, .sorteer-lijst button:focus-visible { outline: 3px solid rgba(255,255,255,.95); outline-offset: 2px; }
+    .sorteer-lijst { position: absolute; top: calc(100% + 8px); right: 0; min-width: 100%; width: max-content; padding: 6px; border-radius: 20px;
+      background: linear-gradient(135deg, rgba(10,42,107,.82), rgba(11,94,215,.72)); -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%);
+      border: 1px solid rgba(255,255,255,.4); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 16px 40px rgba(0,20,60,.45); }
+    .sorteer-lijst[hidden] { display: none; }
+    .sorteer-lijst button { display: flex; align-items: center; justify-content: space-between; gap: 18px; width: 100%; min-height: 44px; padding: 0 14px; border: 0; border-radius: 14px;
+      background: transparent; color: #fff; font-family: var(--kop); font-weight: 600; font-size: 14px; text-align: left; cursor: pointer; }
+    .sorteer-lijst button[aria-selected="true"] { background: rgba(255,255,255,.22); font-weight: 800; }
+    .sorteer-lijst button[aria-selected="true"]::after { content: "✓"; }
+    @media (hover: hover) { .sorteer-lijst button:hover { background: rgba(255,255,255,.18); } }
+    @media (max-width: 520px) { .sorteer { top: calc(env(safe-area-inset-top, 0px) + 30px); right: calc(env(safe-area-inset-right, 0px) + 12px); } }
+
+    /* Pop-up (naam kiezen, verwijderen) in de stijl van de app */
+    .dlg-achter { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 250; display: none; align-items: center; justify-content: center;
+      padding: calc(env(safe-area-inset-top, 0px) + 16px) calc(env(safe-area-inset-right, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 16px) calc(env(safe-area-inset-left, 0px) + 16px);
+      background: rgba(0,20,60,.5); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+    .dlg-achter.open { display: flex; animation: verschijn .25s ease backwards; }
+    .dlg-kaart { width: min(420px, 100%); padding: 26px 24px 22px; border-radius: 30px; text-align: center;
+      background: linear-gradient(135deg, rgba(11,94,215,.62), rgba(7,176,168,.5) 60%, rgba(47,210,122,.5));
+      -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%);
+      border: 1px solid rgba(255,255,255,.55); box-shadow: inset 0 1px 0 rgba(255,255,255,.7), inset 0 -1px 0 rgba(255,255,255,.12), 0 28px 70px rgba(0,20,60,.5);
+      color: #fff; text-shadow: 0 1px 4px rgba(0,20,60,.35); }
+    .dlg-icoon { width: 60px; height: 60px; margin: 0 auto 14px; border-radius: 19px; display: grid; place-items: center;
+      background: linear-gradient(135deg, #0b5ed7, #34d399); box-shadow: 0 10px 24px rgba(0,20,60,.35), inset 0 1px 0 rgba(255,255,255,.5); }
+    .dlg-icoon svg { width: 28px; height: 28px; }
+    .dlg-kaart h2 { margin: 0 0 6px; font-family: var(--kop); font-weight: 800; font-size: 24px; }
+    .dlg-uitleg { margin: 0 0 16px; font-size: 15px; font-weight: 300; line-height: 1.4; overflow-wrap: anywhere; }
+    .dlg-uitleg[hidden], .dlg-veld[hidden] { display: none; }
+    .dlg-veld { display: block; width: 100%; margin: 0 0 16px; padding: 15px 18px; border-radius: 18px; border: 1px solid rgba(255,255,255,.55);
+      background: rgba(255,255,255,.2); color: #fff; font-family: var(--tekst); font-size: 17px; text-align: center; outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.4); text-shadow: none; }
+    .dlg-veld::placeholder { color: rgba(255,255,255,.7); }
+    .dlg-veld:focus { border-color: #fff; box-shadow: 0 0 0 4px rgba(255,255,255,.2); }
+    .dlg-knoppen { display: flex; gap: 10px; }
+    .dlg-knop { flex: 1 1 0; min-height: 50px; padding: 0 16px; border-radius: 18px; font-family: var(--kop); font-weight: 800; font-size: 16px; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: background .2s, transform .15s; }
+    @media (hover: hover) { .dlg-knop:hover { background: rgba(255,255,255,.3); } }
+    .dlg-knop:active { transform: scale(.96); }
+    .dlg-knop:focus-visible { outline: 3px solid rgba(255,255,255,.95); outline-offset: 3px; }
+    .dlg-knop.hoofd { background: linear-gradient(135deg, #38bdf8, #4ade80); color: #06274f; text-shadow: none; border-color: rgba(255,255,255,.9); }
+    .dlg-knop.hoofd.gevaar { background: linear-gradient(135deg, #f43f5e, #fb7185); color: #fff; text-shadow: 0 1px 3px rgba(80,0,20,.4); }
     .saved-card { padding:18px; border-radius:20px; min-width:0; }
     .saved-card h3 { margin:0 0 8px; font-family:var(--kop); overflow-wrap:anywhere; }
     .saved-card p { white-space:pre-wrap; overflow-wrap:anywhere; max-height:110px; overflow:hidden; font-size:14px; opacity:.9; }
@@ -958,6 +1024,58 @@
     <p class="ondertitel">Al je bewaarde akkoorden en songteksten op één plek.</p>
     <div class="saved-list" id="savedList"><p class="saved-empty">Je opgeslagen teksten verschijnen hier.</p></div>
   </section>
+
+  <!-- Sorteerkeuze rechtsboven op de pagina Opgeslagen teksten -->
+  <div class="sorteer" id="sorteer">
+    <button class="sorteer-knop glass" id="sorteerKnop" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Sorteren">
+      <span id="sorteerNaam">Recent bekeken</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="sorteer-lijst" id="sorteerLijst" role="listbox" aria-label="Sorteren op" hidden>
+      <button type="button" role="option" data-modus="recent" aria-selected="true">Recent bekeken</button>
+      <button type="button" role="option" data-modus="nieuw" aria-selected="false">Nieuwste eerst</button>
+      <button type="button" role="option" data-modus="az" aria-selected="false">A tot Z</button>
+    </div>
+  </div>
+
+  <!-- Een opgeslagen tekst schermvullend: lijkt precies op het grote tekstvak, maar hoort bij de opgeslagen tekst -->
+  <div class="tekstdoos vol" id="opgViewer" hidden>
+    <textarea id="vTekst" class="glass" spellcheck="false" autocomplete="off" readonly aria-label="Opgeslagen tekst"></textarea>
+    <button class="tekst-vol-knop glass" id="vSluit" type="button" aria-label="Terug naar opgeslagen teksten" title="Terug naar opgeslagen teksten">
+      <svg class="ico-uit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3a2 2 0 0 0 2-2V3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M21 16h-3a2 2 0 0 0-2 2v3"/></svg>
+    </button>
+    <button class="tekst-bewerk-knop glass" id="vBewerk" type="button" aria-pressed="false" aria-label="Tekst bewerken" title="Tekst bewerken">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+    </button>
+    <div class="tekst-acties">
+      <button class="kopieer-knop glass" id="vKopieer" type="button" aria-label="Alle tekst kopiëren" title="Alle tekst kopiëren">
+        <svg class="ico-kopie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><rect x="4" y="4" width="11" height="11" rx="2"></rect></svg>
+        <svg class="ico-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      </button>
+      <button class="save-knop glass" id="vBewaar" type="button" aria-label="Wijzigingen opslaan" title="Wijzigingen opslaan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+      </button>
+    </div>
+    <div class="zoom-balk">
+      <span>100%</span>
+      <input type="range" id="vZoom" min="100" max="300" step="5" value="100" aria-label="Inzoomen op de tekst" aria-valuetext="100%">
+      <span>300%</span>
+    </div>
+  </div>
+
+  <!-- Pop-up in de stijl van de app: naam kiezen bij opslaan, en verwijderen bevestigen -->
+  <div class="dlg-achter" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitel">
+    <form class="dlg-kaart" id="dlgForm" autocomplete="off">
+      <div class="dlg-icoon" id="dlgIcoon" aria-hidden="true"></div>
+      <h2 id="dlgTitel"></h2>
+      <p class="dlg-uitleg" id="dlgUitleg"></p>
+      <input class="dlg-veld" id="dlgInvoer" type="text" maxlength="60" placeholder="Naam van de tekst" aria-label="Naam van de tekst">
+      <div class="dlg-knoppen">
+        <button class="dlg-knop glass" id="dlgNee" type="button">Annuleren</button>
+        <button class="dlg-knop hoofd" id="dlgJa" type="submit">Opslaan</button>
+      </div>
+    </form>
+  </div>
   <!-- Supabase verzorgt accounts en de online database. Vul je eigen projectgegevens hieronder in. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -1326,6 +1444,26 @@
       }
       pulseer();
     });
+    // ---------- Volledig scherm van de browser (voor het grote tekstvak en geopende opgeslagen teksten) ----------
+    const wortel = document.documentElement;
+    const vraagFs = wortel.requestFullscreen || wortel.webkitRequestFullscreen;
+    const fsToegestaan = document.fullscreenEnabled !== undefined ? document.fullscreenEnabled : document.webkitFullscreenEnabled;
+    // iPhone-Safari laat websites niet schermvullend gaan: daar vult het tekstvak gewoon het hele scherm van de pagina
+    const fsMogelijk = !!vraagFs && fsToegestaan !== false;
+    function fsElement() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
+    function gaFs(bijFout) {
+      try {
+        const p = vraagFs.call(wortel);
+        if (p && p.catch) p.catch(function () { if (bijFout) bijFout(); });
+      } catch (fout) { if (bijFout) bijFout(); }
+    }
+    function verlaatFs() {
+      const uit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (!uit) return;
+      try { const p = uit.call(document); if (p && p.catch) p.catch(function () {}); } catch (fout) { /* niet erg */ }
+    }
+    function updateFsKnop() { /* er is geen aparte knop voor volledig scherm meer */ }
+
     // ---------- Tekstvak over het hele scherm (wit met zwarte letters) ----------
     const tekstdoos = document.getElementById("tekstdoos");
     const tekstVolKnop = document.getElementById("tekstVol");
@@ -1837,6 +1975,51 @@
     }
     document.getElementById("signOutBtn").addEventListener("click", uitloggen);
     document.getElementById("logoutAppBtn").addEventListener("click", uitloggen);
+    // ---------- Pop-up in de stijl van de app (vervangt het standaard vraagvenstertje van de browser) ----------
+    const dlg = document.getElementById("dlg");
+    const dlgInvoer = document.getElementById("dlgInvoer");
+    const dlgJa = document.getElementById("dlgJa");
+    let dlgKlaar = null;
+    const ICOON_OPSLAAN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>';
+    const ICOON_PRULLENBAK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M6 6l1 14a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-14M10 11v6M14 11v6"/></svg>';
+
+    function toonDlg(o) {
+      return new Promise(function (klaar) {
+        if (dlgKlaar) dlgKlaar(null);
+        document.getElementById("dlgTitel").textContent = o.titel;
+        const uitleg = document.getElementById("dlgUitleg");
+        uitleg.textContent = o.uitleg || "";
+        uitleg.hidden = !o.uitleg;
+        dlgInvoer.hidden = !o.invoer;
+        dlgInvoer.value = o.standaard || "";
+        dlgJa.textContent = o.ja || "Oké";
+        dlgJa.classList.toggle("gevaar", !!o.gevaar);
+        document.getElementById("dlgNee").textContent = o.nee || "Annuleren";
+        document.getElementById("dlgIcoon").innerHTML = o.icoon || ICOON_OPSLAAN;
+        dlg.classList.add("open");
+        dlgKlaar = function (antwoord) {
+          dlg.classList.remove("open");
+          dlgKlaar = null;
+          klaar(antwoord);
+        };
+        setTimeout(function () {
+          if (o.invoer) { dlgInvoer.focus(); dlgInvoer.select(); } else { dlgJa.focus(); }
+        }, 60);
+      });
+    }
+    document.getElementById("dlgForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (dlgKlaar) dlgKlaar(dlgInvoer.hidden ? true : dlgInvoer.value);
+    });
+    document.getElementById("dlgNee").addEventListener("click", function () { if (dlgKlaar) dlgKlaar(null); });
+    dlg.addEventListener("click", function (e) { if (e.target === dlg && dlgKlaar) dlgKlaar(null); });
+
+    // ---------- Opslaan ----------
+    function standaardNaam(tekst) {
+      const regel = tekst.split(/\r?\n/).map(function (r) { return r.trim(); }).filter(Boolean)[0] || "";
+      return regel.slice(0, 40) || "Mijn akkoorden";
+    }
+
     async function slaTekstOp() {
       const inhoud = tekstvak.value.trim();
       if (!inhoud) { toonMelding("Er staat nog geen tekst in het tekstvak."); return; }
@@ -1844,7 +2027,13 @@
         toonMelding("Log eerst in om je tekst veilig online op te slaan.");
         return;
       }
-      const naam = prompt("Geef deze tekst een naam:", "Mijn akkoorden");
+      const naam = await toonDlg({
+        titel: "Tekst opslaan",
+        uitleg: "Geef je tekst een naam. Hij komt als blokje bij Opgeslagen teksten.",
+        invoer: true,
+        standaard: standaardNaam(inhoud),
+        ja: "Opslaan"
+      });
       if (naam === null) return;
       const { error } = await supabaseClient.from("saved_texts").insert({
         user_id: huidigeGebruiker.id,
@@ -1852,69 +2041,332 @@
         content: inhoud
       });
       if (error) { toonMelding("Opslaan mislukt: " + error.message); return; }
+      const knop = document.getElementById("saveTextBtn");
+      knop.classList.add("gelukt");
+      setTimeout(function () { knop.classList.remove("gelukt"); }, 1600);
       toonMelding("Tekst opgeslagen!");
       if (location.hash === "#opgeslagen") laadOpgeslagenTeksten();
     }
     document.getElementById("saveTextBtn").addEventListener("click", slaTekstOp);
+
+    // ---------- Opgeslagen teksten: lijst en sorteren ----------
+    let opgeslagen = [];                   // alle teksten van deze gebruiker
+    const SORTEER_NAMEN = { recent: "Recent bekeken", nieuw: "Nieuwste eerst", az: "A tot Z" };
+    let sorteerModus = "recent";
+    let geopend = {};                      // wanneer elke tekst voor het laatst is geopend (ook onthouden op dit apparaat)
+    try {
+      const m = localStorage.getItem("kc-sorteer");
+      if (SORTEER_NAMEN[m]) sorteerModus = m;
+      geopend = JSON.parse(localStorage.getItem("kc-geopend") || "{}") || {};
+    } catch (fout) { geopend = {}; }
+
+    function tijd(waarde) { const t = Date.parse(waarde); return isNaN(t) ? 0 : t; }
+    // Voor "recent bekeken": een nieuwe tekst telt als bekeken op het moment dat je hem maakte
+    function bekekenOp(item) {
+      return Math.max(tijd(item.last_opened_at), geopend[item.id] || 0, tijd(item.created_at));
+    }
+    function eersteLetter(titel) {
+      const c = (titel.trim()[0] || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase();
+      return /^[A-Z]$/.test(c) ? c : "#";       // cijfers en tekens komen onderaan onder #
+    }
+    function sorteerLijst(lijst, modus) {
+      const l = lijst.slice();
+      if (modus === "az") {
+        l.sort(function (a, b) {
+          const la = eersteLetter(a.title), lb = eersteLetter(b.title);
+          if (la !== lb) return la === "#" ? 1 : lb === "#" ? -1 : la < lb ? -1 : 1;
+          return a.title.localeCompare(b.title, "nl", { sensitivity: "base", numeric: true });
+        });
+      } else if (modus === "nieuw") {
+        l.sort(function (a, b) { return tijd(b.created_at) - tijd(a.created_at); });
+      } else {
+        l.sort(function (a, b) { return bekekenOp(b) - bekekenOp(a); });
+      }
+      return l;
+    }
+
+    function maakKaart(item) {
+      const kaart = document.createElement("article");
+      kaart.className = "saved-card glass";
+      const titel = document.createElement("h3");
+      titel.textContent = item.title;
+      const datum = document.createElement("small");
+      datum.textContent = new Date(item.created_at).toLocaleDateString("nl-NL");
+      const preview = document.createElement("p");
+      preview.textContent = item.content;
+      const acties = document.createElement("div");
+      acties.className = "saved-actions";
+      const open = document.createElement("button");
+      open.type = "button"; open.textContent = "Openen";
+      open.addEventListener("click", function () { openViewer(item.id); });
+      const verwijderen = document.createElement("button");
+      verwijderen.type = "button"; verwijderen.textContent = "Verwijderen";
+      verwijderen.addEventListener("click", async function () {
+        const ja = await toonDlg({
+          titel: "Verwijderen?",
+          uitleg: "“" + item.title + "” wordt voorgoed verwijderd. Dit kun je niet ongedaan maken.",
+          ja: "Verwijderen", nee: "Houden", gevaar: true, icoon: ICOON_PRULLENBAK
+        });
+        if (!ja) return;
+        const { error: deleteError } = await supabaseClient.from("saved_texts").delete().eq("id", item.id);
+        if (deleteError) toonMelding("Verwijderen mislukt: " + deleteError.message);
+        else laadOpgeslagenTeksten();
+      });
+      acties.append(open, verwijderen);
+      kaart.append(titel, datum, preview, acties);
+      return kaart;
+    }
+
+    function tekenOpgeslagen() {
+      const lijst = document.getElementById("savedList");
+      lijst.textContent = "";
+      document.getElementById("sorteerNaam").textContent = SORTEER_NAMEN[sorteerModus];
+      document.querySelectorAll("#sorteerLijst button").forEach(function (b) {
+        b.setAttribute("aria-selected", b.dataset.modus === sorteerModus ? "true" : "false");
+      });
+      if (!opgeslagen.length) {
+        lijst.innerHTML = '<p class="saved-empty">Je hebt nog geen teksten opgeslagen. Ga terug en druk op het opslaan-icoon.</p>';
+        return;
+      }
+      const gesorteerd = sorteerLijst(opgeslagen, sorteerModus);
+      let raster = null, huidigeLetter = null;
+      gesorteerd.forEach(function (item) {
+        if (sorteerModus === "az") {
+          const letter = eersteLetter(item.title);
+          if (letter !== huidigeLetter) {
+            huidigeLetter = letter;
+            const kop = document.createElement("h2");
+            kop.className = "letter-kop";
+            kop.textContent = letter;
+            lijst.appendChild(kop);
+            raster = null;
+          }
+        }
+        if (!raster) {
+          raster = document.createElement("div");
+          raster.className = "saved-grid";
+          lijst.appendChild(raster);
+        }
+        raster.appendChild(maakKaart(item));
+      });
+    }
+
     async function laadOpgeslagenTeksten() {
       const lijst = document.getElementById("savedList");
       if (!supabaseClient || !huidigeGebruiker) {
         lijst.innerHTML = '<p class="saved-empty">Log in om je persoonlijke opgeslagen teksten te bekijken.</p>';
         return;
       }
-      lijst.innerHTML = '<p class="saved-empty">Opgeslagen teksten laden...</p>';
-      const { data, error } = await supabaseClient.from("saved_texts")
-        .select("id,title,content,created_at").order("created_at", { ascending: false });
-      if (error) {
-        lijst.textContent = "Kon teksten niet laden: " + error.message;
+      if (!opgeslagen.length) lijst.innerHTML = '<p class="saved-empty">Opgeslagen teksten laden...</p>';
+      // De kolom last_opened_at hoort bij "Recent bekeken". Bestaat die nog niet in je database, dan werkt de lijst gewoon verder.
+      let antwoord = await supabaseClient.from("saved_texts").select("id,title,content,created_at,last_opened_at").order("created_at", { ascending: false });
+      if (antwoord.error) antwoord = await supabaseClient.from("saved_texts").select("id,title,content,created_at").order("created_at", { ascending: false });
+      if (antwoord.error) {
+        lijst.textContent = "Kon teksten niet laden: " + antwoord.error.message;
         return;
       }
-      if (!data || !data.length) {
-        lijst.innerHTML = '<p class="saved-empty">Je hebt nog geen teksten opgeslagen. Ga terug en druk op het opslaan-icoon.</p>';
-        return;
+      opgeslagen = antwoord.data || [];
+      tekenOpgeslagen();
+    }
+
+    // Sorteerkeuze rechtsboven: je ziet alleen de gekozen modus, met een pijltje om de andere te kiezen
+    const sorteerKnop = document.getElementById("sorteerKnop");
+    const sorteerLijstEl = document.getElementById("sorteerLijst");
+    function zetSorteerMenu(open) {
+      sorteerLijstEl.hidden = !open;
+      sorteerKnop.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    sorteerKnop.addEventListener("click", function (e) {
+      e.stopPropagation();
+      zetSorteerMenu(sorteerLijstEl.hidden);
+    });
+    sorteerLijstEl.addEventListener("click", function (e) {
+      const knop = e.target.closest("button[data-modus]");
+      if (!knop) return;
+      sorteerModus = knop.dataset.modus;
+      try { localStorage.setItem("kc-sorteer", sorteerModus); } catch (fout) { /* niet erg */ }
+      zetSorteerMenu(false);
+      tekenOpgeslagen();
+    });
+    document.addEventListener("click", function () { zetSorteerMenu(false); });
+
+    // ---------- Een opgeslagen tekst openen: schermvullend, net als het grote tekstvak ----------
+    const viewer = document.getElementById("opgViewer");
+    const vTekst = document.getElementById("vTekst");
+    const vBewerk = document.getElementById("vBewerk");
+    const vZoom = document.getElementById("vZoom");
+    let vId = null, vOrigineel = "", vZoomWaarde = 1, vKnijp = null, vFsZelf = false;
+
+    function viewerOpen() { return !viewer.hidden; }
+
+    function pasViewerHoogte() {
+      if (!viewerOpen() || !window.visualViewport) return;
+      viewer.style.top = window.visualViewport.offsetTop + "px";
+      viewer.style.height = window.visualViewport.height + "px";
+      viewer.style.bottom = "auto";
+    }
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", pasViewerHoogte);
+      window.visualViewport.addEventListener("scroll", pasViewerHoogte);
+    }
+
+    function zetVBewerken(aan) {
+      vTekst.readOnly = !aan;
+      vBewerk.setAttribute("aria-pressed", aan ? "true" : "false");
+      const t = aan ? "Tekst vergrendelen (niet meer bewerken)" : "Tekst bewerken";
+      vBewerk.setAttribute("aria-label", t);
+      vBewerk.title = t;
+      if (aan) { try { vTekst.focus({ preventScroll: true }); } catch (fout) { vTekst.focus(); } } else { vTekst.blur(); }
+    }
+    vBewerk.addEventListener("click", function () { zetVBewerken(vTekst.readOnly); });
+
+    function zetVZoom(z) {
+      const nieuw = Math.min(3, Math.max(1, z));
+      if (Math.abs(nieuw - vZoomWaarde) < 0.001) return;
+      const verhouding = vTekst.scrollTop / (vTekst.scrollHeight || 1);
+      vZoomWaarde = nieuw;
+      viewer.style.setProperty("--zoom", String(nieuw));
+      vZoom.value = Math.round(nieuw * 100);
+      vZoom.setAttribute("aria-valuetext", Math.round(nieuw * 100) + "%");
+      vTekst.scrollTop = verhouding * vTekst.scrollHeight;
+    }
+    vZoom.addEventListener("input", function () { zetVZoom(Number(vZoom.value) / 100); });
+    function vAfstand(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
+    viewer.addEventListener("touchstart", function (e) {
+      if (viewerOpen() && e.touches.length === 2) vKnijp = { afstand: vAfstand(e.touches), zoom: vZoomWaarde };
+    }, { passive: true });
+    viewer.addEventListener("touchmove", function (e) {
+      if (!viewerOpen() || !vKnijp || e.touches.length !== 2) return;
+      if (e.cancelable) e.preventDefault();
+      if (vKnijp.afstand > 0) zetVZoom(vKnijp.zoom * (vAfstand(e.touches) / vKnijp.afstand));
+    }, { passive: false });
+    function vKnijpKlaar(e) { if (e.touches.length < 2) vKnijp = null; }
+    viewer.addEventListener("touchend", vKnijpKlaar, { passive: true });
+    viewer.addEventListener("touchcancel", vKnijpKlaar, { passive: true });
+    let vGebaarStart = 1;
+    viewer.addEventListener("gesturestart", function (e) { if (viewerOpen()) { e.preventDefault(); vGebaarStart = vZoomWaarde; } });
+    viewer.addEventListener("gesturechange", function (e) { if (viewerOpen()) { e.preventDefault(); if (!vKnijp) zetVZoom(vGebaarStart * e.scale); } });
+    viewer.addEventListener("gestureend", function (e) { if (viewerOpen()) e.preventDefault(); });
+    viewer.addEventListener("wheel", function (e) {
+      if (!viewerOpen() || !e.ctrlKey) return;
+      e.preventDefault();
+      zetVZoom(vZoomWaarde * Math.exp(-Math.max(-25, Math.min(25, e.deltaY)) * 0.01));
+    }, { passive: false });
+
+    function markeerGeopend(item) {
+      geopend[item.id] = Date.now();
+      item.last_opened_at = new Date().toISOString();
+      try { localStorage.setItem("kc-geopend", JSON.stringify(geopend)); } catch (fout) { /* niet erg */ }
+      // Ook in de database, zodat "Recent bekeken" op al je apparaten klopt (lukt stilletjes niet zonder de kolom)
+      if (supabaseClient && huidigeGebruiker) {
+        supabaseClient.from("saved_texts").update({ last_opened_at: item.last_opened_at }).eq("id", item.id).then(function () {}, function () {});
       }
-      lijst.innerHTML = "";
-      data.forEach(item => {
-        const kaart = document.createElement("article");
-        kaart.className = "saved-card glass";
-        const titel = document.createElement("h3");
-        titel.textContent = item.title;
-        const datum = document.createElement("small");
-        datum.textContent = new Date(item.created_at).toLocaleDateString("nl-NL");
-        const preview = document.createElement("p");
-        preview.textContent = item.content;
-        const acties = document.createElement("div");
-        acties.className = "saved-actions";
-        const open = document.createElement("button");
-        open.type = "button"; open.textContent = "Openen";
-        open.addEventListener("click", () => {
-          tekstvak.value = item.content;
-          toegepast = 0;                 // Oké schuift de opgeslagen tekst niet meteen nog eens op
-          resetShorter();
-          stand.nieuw = stand.orig;
-          nieuwGekozen = false;
-          toon();
-          location.hash = "";
-          window.scrollTo(0, 0);
-          toonMelding("Tekst teruggezet in het tekstvak.");
-        });
-        const verwijderen = document.createElement("button");
-        verwijderen.type = "button"; verwijderen.textContent = "Verwijderen";
-        verwijderen.addEventListener("click", async () => {
-          if (!confirm("Deze opgeslagen tekst verwijderen?")) return;
-          const { error: deleteError } = await supabaseClient.from("saved_texts").delete().eq("id", item.id);
-          if (deleteError) toonMelding("Verwijderen mislukt: " + deleteError.message);
-          else laadOpgeslagenTeksten();
-        });
-        acties.append(open, verwijderen);
-        kaart.append(titel, datum, preview, acties);
-        lijst.appendChild(kaart);
+    }
+
+    function openViewer(id) {
+      const item = opgeslagen.find(function (x) { return x.id === id; });
+      if (!item) return;
+      vId = id;
+      vOrigineel = item.content;
+      vTekst.value = item.content;
+      viewer.hidden = false;
+      document.body.classList.add("tekst-vol");
+      zetVZoom(1);
+      zetVBewerken(false);              // je begint met een vergrendelde tekst: eerst op het potlood drukken om te typen
+      vTekst.scrollTop = 0;
+      pasViewerHoogte();
+      markeerGeopend(item);
+      if (fsMogelijk && !fsElement()) {
+        vFsZelf = true;
+        gaFs(function () { vFsZelf = false; });
+      }
+    }
+
+    async function bewaarViewer(stil) {
+      const item = opgeslagen.find(function (x) { return x.id === vId; });
+      const nieuw = vTekst.value;
+      if (!item || nieuw === item.content) return true;
+      if (!nieuw.trim()) { toonMelding("Een lege tekst kun je niet opslaan."); return false; }
+      const { error } = await supabaseClient.from("saved_texts").update({ content: nieuw }).eq("id", vId);
+      if (error) { toonMelding("Opslaan mislukt: " + error.message); return false; }
+      item.content = nieuw;
+      vOrigineel = nieuw;
+      if (!stil) toonMelding("Wijzigingen opgeslagen!");
+      return true;
+    }
+
+    // Terug naar de pagina met opgeslagen teksten. Heb je iets aangepast, dan wordt dat eerst bewaard.
+    async function sluitViewer() {
+      if (!viewerOpen()) return;
+      if (vTekst.value !== vOrigineel) {
+        const gelukt = await bewaarViewer(true);
+        if (gelukt) toonMelding("Wijzigingen opgeslagen!");
+      }
+      const mochtUit = vFsZelf;
+      vFsZelf = false;
+      viewer.hidden = true;
+      document.body.classList.remove("tekst-vol");
+      viewer.style.top = ""; viewer.style.height = ""; viewer.style.bottom = "";
+      vKnijp = null;
+      zetVZoom(1);
+      vTekst.blur();
+      if (mochtUit && fsElement()) verlaatFs();
+      if (document.body.classList.contains("saved-open")) tekenOpgeslagen();
+    }
+    document.getElementById("vSluit").addEventListener("click", sluitViewer);
+
+    const vBewaarKnop = document.getElementById("vBewaar");
+    vBewaarKnop.addEventListener("click", async function () {
+      if (await bewaarViewer(false)) {
+        vBewaarKnop.classList.add("gelukt");
+        setTimeout(function () { vBewaarKnop.classList.remove("gelukt"); }, 1600);
+      }
+    });
+
+    // Kopiëren los van het tekstvak (werkt ook zonder https)
+    function kopieerLos(tekst) {
+      if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(tekst);
+      return new Promise(function (ok, fout) {
+        const tijdelijk = document.createElement("textarea");
+        tijdelijk.value = tekst;
+        tijdelijk.setAttribute("readonly", "");
+        tijdelijk.style.cssText = "position:fixed;top:0;left:0;opacity:0;font-size:16px";
+        document.body.appendChild(tijdelijk);
+        tijdelijk.select();
+        let gelukt = false;
+        try { gelukt = document.execCommand("copy"); } catch (e) { /* niet erg */ }
+        tijdelijk.remove();
+        if (gelukt) ok(); else fout();
       });
     }
+    const vKopieerKnop = document.getElementById("vKopieer");
+    vKopieerKnop.addEventListener("click", function () {
+      if (vTekst.value === "") return;
+      kopieerLos(vTekst.value).then(function () {
+        vKopieerKnop.classList.add("gelukt");
+        setTimeout(function () { vKopieerKnop.classList.remove("gelukt"); }, 1600);
+        toonMelding("Tekst gekopieerd!");
+      }).catch(function () { toonMelding("Kopiëren mislukt. Selecteer de tekst en kopieer hem zelf."); });
+    });
+
+    // Esc: eerst een pop-up of menu sluiten, dan het schermvullende scherm
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      if (dlgKlaar) { dlgKlaar(null); e.stopImmediatePropagation(); }
+      else if (!sorteerLijstEl.hidden) { zetSorteerMenu(false); e.stopImmediatePropagation(); }
+      else if (viewerOpen()) { sluitViewer(); e.stopImmediatePropagation(); }
+    }, true);
+    // Op Esc of via de browser uit volledig scherm: ook terug naar de lijst
+    function viewerFs() { if (vFsZelf && !fsElement() && viewerOpen()) sluitViewer(); }
+    document.addEventListener("fullscreenchange", viewerFs);
+    document.addEventListener("webkitfullscreenchange", viewerFs);
+
     // De bibliotheek en de opgeslagen teksten zijn aparte interne pagina's.
     const originelePasPaginaAan = pasPaginaAan;
     pasPaginaAan = function () {
       const hash = location.hash;
+      if (typeof sluitViewer === "function" && viewerOpen()) sluitViewer();
+      zetSorteerMenu(false);
       if (hash === "#opgeslagen") {
         document.body.classList.remove("bieb-open");
         document.body.classList.add("saved-open");
