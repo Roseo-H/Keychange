@@ -933,8 +933,12 @@
       body.heeft-logout:not(.start):not(.login-open):not(.bieb-open):not(.saved-open) .vol-knop { right: calc(env(safe-area-inset-right, 0px) + 126px); }
     }
 
+    .login-page .account-row .gast-knop { background: transparent; border: 1px dashed rgba(255,255,255,.65); box-shadow: none; font-weight: 400; }
+    @media (hover: hover) { .login-page .account-row .gast-knop:hover { background: rgba(255,255,255,.14); } }
+
     /* Dubbeltikken mag geen inzoomen of tekst selecteren veroorzaken */
     html { touch-action: manipulation; }
+    .saved-login { padding: 11px 22px; border-radius: 14px; border: 1px solid rgba(255,255,255,.5); background: rgba(255,255,255,.2); color: #fff; font-family: var(--kop); font-weight: 800; font-size: 15px; cursor: pointer; }
     body { -webkit-user-select: none; user-select: none; }
     textarea, input, .dlg-veld { -webkit-user-select: text; user-select: text; }
   </style>
@@ -985,6 +989,7 @@
         <input id="authPassword" type="password" autocomplete="current-password" placeholder="Wachtwoord" aria-label="Wachtwoord">
         <button type="button" id="signInBtn">Inloggen</button>
         <button type="button" id="signUpBtn">Account maken</button>
+        <button type="button" id="guestBtn" class="gast-knop">Zonder inloggen verder gaan</button>
       </div>
       <div class="account-row" id="signedIn" hidden>
         <span id="userEmail" style="flex:1;overflow-wrap:anywhere"></span>
@@ -2025,12 +2030,20 @@
       document.getElementById("loginPage").hidden = false;
       document.getElementById("authEmail").focus();
     }
+    // Rechtsboven: "Uitloggen" als je bent ingelogd, "Inloggen" als je zonder account verder gaat
+    let gast = false;
+    function zetAccountKnop() {
+      const knop = document.getElementById("logoutAppBtn");
+      const zichtbaar = !!huidigeGebruiker || gast;
+      knop.hidden = !zichtbaar;
+      knop.textContent = huidigeGebruiker ? "Uitloggen" : "Inloggen";
+      document.body.classList.toggle("heeft-logout", zichtbaar);
+    }
     function verwerkSessie(session, eventName) {
       huidigeGebruiker = session && session.user ? session.user : null;
       authForm.hidden = !!huidigeGebruiker;
       signedIn.hidden = !huidigeGebruiker;
-      document.getElementById("logoutAppBtn").hidden = !huidigeGebruiker;
-      document.body.classList.toggle("heeft-logout", !!huidigeGebruiker);
+      zetAccountKnop();
       document.getElementById("userEmail").textContent = huidigeGebruiker ? huidigeGebruiker.email : "";
       if (huidigeGebruiker) {
         statusAccount("Ingelogd. Je teksten worden aan dit account gekoppeld.");
@@ -2092,7 +2105,13 @@
       }
     }
     document.getElementById("signOutBtn").addEventListener("click", uitloggen);
-    document.getElementById("logoutAppBtn").addEventListener("click", uitloggen);
+    document.getElementById("logoutAppBtn").addEventListener("click", () => { if (huidigeGebruiker) uitloggen(); else openInlogPagina(); });
+    // Zonder inloggen verder: je komt op de gewone pagina, maar teksten opslaan kan dan niet
+    document.getElementById("guestBtn").addEventListener("click", () => {
+      gast = true;
+      zetAccountKnop();
+      openGewonePagina();
+    });
     // ---------- Pop-up in de stijl van de app (vervangt het standaard vraagvenstertje van de browser) ----------
     const dlg = document.getElementById("dlg");
     const dlgInvoer = document.getElementById("dlgInvoer");
@@ -2142,7 +2161,12 @@
       const inhoud = tekstvak.value.trim();
       if (!inhoud) { toonMelding("Er staat nog geen tekst in het tekstvak."); return; }
       if (!supabaseClient || !huidigeGebruiker) {
-        toonMelding("Log eerst in om je tekst veilig online op te slaan.");
+        const inloggen = await toonDlg({
+          titel: "Eerst inloggen",
+          uitleg: "Om je tekst op te slaan heb je een account nodig. Dan staat hij ook op je andere apparaten.",
+          ja: "Inloggen", nee: "Later"
+        });
+        if (inloggen) openInlogPagina();
         return;
       }
       const naam = await toonDlg({
@@ -2272,7 +2296,8 @@
     async function laadOpgeslagenTeksten() {
       const lijst = document.getElementById("savedList");
       if (!supabaseClient || !huidigeGebruiker) {
-        lijst.innerHTML = '<p class="saved-empty">Log in om je persoonlijke opgeslagen teksten te bekijken.</p>';
+        lijst.innerHTML = '<p class="saved-empty">Log in om je persoonlijke opgeslagen teksten te bekijken.<br><br><button type="button" class="saved-login">Inloggen</button></p>';
+        lijst.querySelector(".saved-login").addEventListener("click", () => { location.hash = ""; openInlogPagina(); });
         return;
       }
       if (!opgeslagen.length) lijst.innerHTML = '<p class="saved-empty">Opgeslagen teksten laden...</p>';
