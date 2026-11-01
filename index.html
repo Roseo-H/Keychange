@@ -747,6 +747,28 @@
     .ak-naam { font-family: var(--kop); font-weight: 800; font-size: 20px; line-height: 1.15; }
     .ak-alt  { font-size: 12px; line-height: 1.2; min-height: 1.2em; opacity: 0.7; }
     .akkoord-blok svg { flex: 1; min-height: 0; width: 100%; display: block; margin-top: 2px; }
+
+    /* Instrument-knoppen bovenaan de bibliotheek: dezelfde liquid glass als de rest, de gekozen knop is blauw-groen */
+    .inst-balk { display: flex; gap: clamp(8px, 2.4vw, 14px); margin: 20px 0 4px; max-width: 560px; }
+    .inst-knop {
+      flex: 1 1 0; min-width: 0; min-height: 56px; padding: 10px 12px; border-radius: 22px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      font-family: var(--kop); font-weight: 800; font-size: 16px; letter-spacing: 0.3px;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+      transition: background 0.2s, transform 0.15s, border-color 0.2s;
+    }
+    .inst-knop svg { width: 24px; height: 24px; flex: none; display: block; }
+    @media (hover: hover) { .inst-knop:hover { background: rgba(255, 255, 255, 0.28); } }
+    .inst-knop:active { transform: scale(0.97); }
+    .inst-knop:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
+    .inst-knop[aria-selected="true"] {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.55), rgba(74, 222, 128, 0.55));
+      border-color: rgba(255, 255, 255, 0.9);
+    }
+    @media (max-width: 520px) {
+      .inst-knop { min-height: 52px; padding: 8px 6px; gap: 6px; font-size: 14px; border-radius: 20px; }
+      .inst-knop svg { width: 20px; height: 20px; }
+    }
     /* ---------- Telefoon (smal scherm) ---------- */
     @media (max-width: 520px) {
       body {
@@ -1098,8 +1120,25 @@
   <!-- Tweede pagina: de akkoordenbibliotheek. Wordt pas gevuld als je erop klikt -->
   <section class="bieb" id="bieb" aria-label="Akkoordenbibliotheek">
     <h1>Akkoordenbibliotheek</h1>
-    <p class="ondertitel">Zo speel je de akkoorden op gitaar. Lege vakjes met een stippellijn zijn nog niet ingevuld. Tik op het logo om terug te gaan.</p>
-    <div id="biebInhoud"></div>
+    <p class="ondertitel" id="biebUitleg">Zo speel je de akkoorden op gitaar. Lege vakjes met een stippellijn zijn nog niet ingevuld. Tik op het logo om terug te gaan.</p>
+
+    <!-- Kies een instrument: gitaar, piano of ukelele -->
+    <div class="inst-balk" role="tablist" aria-label="Kies een instrument">
+      <button class="inst-knop glass" type="button" role="tab" data-instrument="gitaar" aria-selected="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="16.5" r="3.6"/><circle cx="11.3" cy="12.7" r="2.4"/><path d="M12.9 11.1 20 4M18 2.5 21.5 6"/><circle cx="7.5" cy="16.5" r="0.9" fill="currentColor" stroke="none"/></svg>
+        <span>Gitaar</span>
+      </button>
+      <button class="inst-knop glass" type="button" role="tab" data-instrument="piano" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="2.2"/><path d="M9 19.5V13M15 19.5V13M7.5 4.5V11M12 4.5V11M16.5 4.5V11"/></svg>
+        <span>Piano</span>
+      </button>
+      <button class="inst-knop glass" type="button" role="tab" data-instrument="ukelele" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8.6" cy="15.4" r="5.2"/><path d="M12.4 11.6 19 5M17 3l4 4"/><circle cx="8.6" cy="15.4" r="1.1" fill="currentColor" stroke="none"/></svg>
+        <span>Ukelele</span>
+      </button>
+    </div>
+
+    <div id="biebInhoud" role="tabpanel"></div>
   </section>
   <section class="saved-page" id="savedPage" aria-label="Opgeslagen teksten">
     <h1>Opgeslagen teksten</h1>
@@ -1883,10 +1922,112 @@
       }
       return { vingers: vingers, barre: barre };
     }
+    // ---------- Ukelele (vier snaren, stemming G-C-E-A) ----------
+    // Zelfde idee als bij de gitaar: een vorm schuift over de hals en levert zo alle 12 grondtonen op.
+    // "root" is de toon waar de vorm in zijn open stand bij hoort (C = 0, D = 2, E = 4, F = 5, G = 7, A = 9).
+    // "rel" zijn de frets van de G-, C-, E- en A-snaar in die open stand.
+    // Van elke soort staan er een paar vormen: per akkoord kiest de code de vorm die het laagst op de hals ligt.
+    // Een nieuwe soort toevoegen = één regel hieronder (de soort moet ook in KWALITEITEN staan).
+    const UKE_VORMEN = {
+      "":     [{ root: 0, rel: [0, 0, 0, 3] }, { root: 9, rel: [2, 1, 0, 0] }, { root: 2, rel: [2, 2, 2, 0] }, { root: 7, rel: [0, 2, 3, 2] }],
+      "m":    [{ root: 0, rel: [0, 3, 3, 3] }, { root: 9, rel: [2, 0, 0, 0] }, { root: 2, rel: [2, 2, 1, 0] }, { root: 7, rel: [0, 2, 3, 1] }],
+      "7":    [{ root: 0, rel: [0, 0, 0, 1] }, { root: 9, rel: [0, 1, 0, 0] }, { root: 2, rel: [2, 2, 2, 3] }, { root: 7, rel: [0, 2, 1, 2] }],
+      "m7":   [{ root: 0, rel: [3, 3, 3, 3] }, { root: 9, rel: [0, 0, 0, 0] }, { root: 2, rel: [2, 2, 1, 3] }, { root: 4, rel: [0, 2, 0, 2] }],
+      "maj7": [{ root: 0, rel: [0, 0, 0, 2] }, { root: 9, rel: [1, 1, 0, 0] }, { root: 2, rel: [2, 2, 2, 4] }, { root: 7, rel: [0, 2, 2, 2] }, { root: 5, rel: [2, 4, 1, 3] }],
+      "sus2": [{ root: 0, rel: [0, 2, 3, 3] }, { root: 2, rel: [2, 2, 0, 0] }, { root: 7, rel: [0, 2, 3, 0] }],
+      "sus4": [{ root: 0, rel: [0, 0, 1, 3] }, { root: 9, rel: [2, 2, 0, 0] }, { root: 7, rel: [0, 2, 3, 3] }],
+      "6":    [{ root: 0, rel: [0, 0, 0, 0] }],
+      "aug":  [{ root: 0, rel: [1, 0, 0, 3] }]
+    };
+
+    // Geeft { vingers: [4 getallen], barre: {...} of null }, of null als de ukelele-vorm van dit akkoord nog niet bekend is
+    function zoekUkelele(wortel, sfx) {
+      const vormen = UKE_VORMEN[sfx];
+      if (!vormen) return null;
+      let kies = null;
+      vormen.forEach(function (v) {
+        const pos = (((wortel - v.root) % 12) + 12) % 12;
+        if (!kies || pos < kies.pos) kies = { pos: pos, rel: v.rel };
+      });
+      const vingers = kies.rel.map(function (r) { return r + kies.pos; });
+      let barre = null;
+      if (kies.pos > 0) {
+        const nullen = [];
+        kies.rel.forEach(function (r, i) { if (r === 0) nullen.push(i); });
+        if (nullen.length >= 2) barre = { fret: kies.pos, van: nullen[0], tot: nullen[nullen.length - 1] };
+      }
+      return { vingers: vingers, barre: barre };
+    }
+
+    // ---------- Piano ----------
+    // Bij de piano hoef je niets te onthouden: een akkoord is gewoon een rijtje afstanden in halve tonen vanaf de grondtoon.
+    // Daardoor zijn alle akkoorden meteen ingevuld, ook de soorten die bij gitaar en ukelele nog leeg zijn.
+    const PIANO_AFSTANDEN = {
+      "":        [0, 4, 7],
+      "m":       [0, 3, 7],
+      "7":       [0, 4, 7, 10],
+      "m7":      [0, 3, 7, 10],
+      "maj7":    [0, 4, 7, 11],
+      "sus2":    [0, 2, 7],
+      "sus4":    [0, 5, 7],
+      "6":       [0, 4, 7, 9],
+      "m6":      [0, 3, 7, 9],
+      "9":       [0, 4, 7, 10, 14],
+      "add9":    [0, 4, 7, 14],
+      "dim":     [0, 3, 6],
+      "m7b5":    [0, 3, 6, 10],
+      "aug":     [0, 4, 8],
+      "7sus4":   [0, 5, 7, 10],
+      "dim7":    [0, 3, 6, 9],
+      "maj9":    [0, 4, 7, 11, 14],
+      "m9":      [0, 3, 7, 10, 14],
+      "m(maj7)": [0, 3, 7, 11]
+    };
+
+    // Het toetsenbord op het plaatje loopt van een C tot twee octaven hoger (25 halve tonen: 0 t/m 24).
+    // Past een toon daar niet meer in (de 9 van een B-akkoord), dan zetten we hem een octaaf lager.
+    function zoekPiano(wortel, sfx) {
+      const afstanden = PIANO_AFSTANDEN[sfx];
+      if (!afstanden) return null;
+      return {
+        toetsen: afstanden.map(function (a) { const t = wortel + a; return t > 24 ? t - 12 : t; }),
+        namen: afstanden.map(function (a) { return noten[(wortel + a) % 12]; })
+      };
+    }
+
+    // Tekent het toetsenbord: de toetsen van het akkoord zijn groen, de stip staat op de grondtoon.
+    function tekenPiano(piano) {
+      const WIT = [0, 2, 4, 5, 7, 9, 11];            // halve tonen van C, D, E, F, G, A, B
+      const AANTAL = 15, BR = 10, HOOGTE = 62, ZWART_BR = 6, ZWART_H = 38, Y = 4;
+      const aan = piano ? piano.toetsen : [];
+      const wortel = piano ? piano.toetsen[0] : -1;
+      let s = '<svg viewBox="0 0 150 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
+      for (let i = 0; i < AANTAL; i++) {
+        const noot = Math.floor(i / 7) * 12 + WIT[i % 7];
+        s += '<rect x="' + (i * BR + 0.5) + '" y="' + Y + '" width="' + (BR - 1) + '" height="' + HOOGTE + '" rx="1.6" fill="' +
+             (aan.indexOf(noot) !== -1 ? '#4ade80' : 'rgba(255,255,255,0.92)') + '" stroke="rgba(10,42,107,0.55)" stroke-width="0.8"/>';
+        if (noot === wortel) s += '<circle cx="' + (i * BR + BR / 2) + '" cy="' + (Y + HOOGTE - 7) + '" r="2.3" fill="#0a2a6b"/>';
+      }
+      // zwarte toetsen liggen na C, D, F, G en A (niet na E en B)
+      for (let i = 0; i < AANTAL - 1; i++) {
+        const rest = i % 7;
+        if (rest === 2 || rest === 6) continue;
+        const noot = Math.floor(i / 7) * 12 + WIT[rest] + 1;
+        const ingedrukt = aan.indexOf(noot) !== -1;
+        s += '<rect x="' + ((i + 1) * BR - ZWART_BR / 2) + '" y="' + Y + '" width="' + ZWART_BR + '" height="' + ZWART_H + '" rx="1.2" fill="' +
+             (ingedrukt ? '#4ade80' : '#0a2a6b') + '" stroke="#0a2a6b" stroke-width="0.8"/>';
+        if (noot === wortel) s += '<circle cx="' + ((i + 1) * BR) + '" cy="' + (Y + ZWART_H - 6) + '" r="1.9" fill="#0a2a6b"/>';
+      }
+      return s + '</svg>';
+    }
+
     // Tekent het akkoorddiagram als SVG. Zonder akkoord: een leeg raster.
-    function tekenAkkoord(akkoord) {
-      const X0 = 16, DX = 8, Y0 = 16, DY = 10, RIJEN = 5;
-      const breedte = 5 * DX;
+    // snaren: 6 voor de gitaar (standaard), 4 voor de ukelele
+    function tekenAkkoord(akkoord, snaren) {
+      const N = snaren || 6;
+      const DX = N === 4 ? 11 : 8, Y0 = 16, DY = 10, RIJEN = 5;
+      const breedte = (N - 1) * DX;
+      const X0 = Math.round(36 - breedte / 2);          // het diagram staat in het midden van het vakje
       const vingers = akkoord ? akkoord.vingers : null;
       const barre = akkoord ? akkoord.barre : null;
       // Past alles op de eerste vijf frets? Anders beginnen we bij de laagste fret en zetten het nummer ernaast
@@ -1895,7 +2036,7 @@
       if (gedrukt.length && Math.max.apply(null, gedrukt) > RIJEN) beginFret = Math.min.apply(null, gedrukt);
       let s = '<svg viewBox="0 0 68 76" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
       s += '<g stroke="currentColor" stroke-width="1" stroke-linecap="round" fill="none" opacity="' + (vingers ? 0.85 : 0.3) + '">';
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < N; i++) {
         s += '<line x1="' + (X0 + i * DX) + '" y1="' + Y0 + '" x2="' + (X0 + i * DX) + '" y2="' + (Y0 + RIJEN * DY) + '"/>';
       }
       for (let j = 0; j <= RIJEN; j++) {
@@ -1932,31 +2073,86 @@
       });
       return s + '</svg>';
     }
-    // Bouwt alle vakjes. Gebeurt één keer, pas als je de bibliotheek opent.
-    let biebGebouwd = false;
-    function bouwBieb() {
-      if (biebGebouwd) return;
-      biebGebouwd = true;
+    // ---------- De bibliotheek per instrument ----------
+    const INSTRUMENTEN = {
+      gitaar:  "Zo speel je de akkoorden op gitaar. Lege vakjes met een stippellijn zijn nog niet ingevuld. Tik op het logo om terug te gaan.",
+      piano:   "Zo speel je de akkoorden op piano: speel de groene toetsen tegelijk. De stip staat op de grondtoon. Tik op het logo om terug te gaan.",
+      ukelele: "Zo speel je de akkoorden op ukelele (stemming G-C-E-A). Lege vakjes met een stippellijn zijn nog niet ingevuld. Tik op het logo om terug te gaan."
+    };
+    let instrument = "gitaar";
+    try {
+      const bewaard = localStorage.getItem("keychanger-instrument");
+      if (bewaard && INSTRUMENTEN[bewaard]) instrument = bewaard;      // je keuze blijft bewaard
+    } catch (fout) { /* niet erg */ }
+
+    // Bouwt alle vakjes van één instrument. Elk instrument wordt maar één keer gebouwd.
+    const biebCache = {};
+    function bouwInstrument(naam) {
       const eigen = {};
-      Object.keys(VINGERZETTINGEN).forEach(function (naam) { eigen[sleutel(naam)] = VINGERZETTINGEN[naam]; });
+      Object.keys(VINGERZETTINGEN).forEach(function (n) { eigen[sleutel(n)] = VINGERZETTINGEN[n]; });
+
       let html = "";
       KWALITEITEN.forEach(function (q) {
         html += '<h2 class="ak-titel">' + q.titel + '</h2><div class="ak-rij" role="list">';
         for (let w = 0; w < 12; w++) {
-          const naam = noten[w] + q.sfx;
-          const alt = ALT_WORTELS[w] ? ALT_WORTELS[w] + q.sfx : "";
-          const akkoord = zoekAkkoord(w, q.sfx, eigen);
+          const akkoordNaam = noten[w] + q.sfx;
+          let tweede = ALT_WORTELS[w] ? ALT_WORTELS[w] + q.sfx : "";     // dezelfde toon met mol, bijvoorbeeld Db
+          let akkoord, tekening;
+          if (naam === "piano") {
+            akkoord = zoekPiano(w, q.sfx);
+            if (akkoord) tweede = akkoord.namen.join(" ");                // de tonen van het akkoord
+            tekening = tekenPiano(akkoord);
+          } else if (naam === "ukelele") {
+            akkoord = zoekUkelele(w, q.sfx);
+            tekening = tekenAkkoord(akkoord, 4);
+          } else {
+            akkoord = zoekAkkoord(w, q.sfx, eigen);
+            tekening = tekenAkkoord(akkoord, 6);
+          }
           html += '<div class="akkoord-blok' + (akkoord ? "" : " leeg") + '" role="listitem" title="' +
-                  (akkoord ? naam : naam + ": nog niet ingevuld") + '">' +
-                  '<span class="ak-naam">' + naam + '</span>' +
-                  '<span class="ak-alt">' + alt + '</span>' +
-                  tekenAkkoord(akkoord) +
+                  (akkoord ? akkoordNaam : akkoordNaam + ": nog niet ingevuld") + '">' +
+                  '<span class="ak-naam">' + akkoordNaam + '</span>' +
+                  '<span class="ak-alt">' + tweede + '</span>' +
+                  tekening +
                   '</div>';
         }
         html += '</div>';
       });
-      document.getElementById("biebInhoud").innerHTML = html;
+      return html;
     }
+
+    // Zet de knoppen, de uitleg en de vakjes goed voor het gekozen instrument
+    function bouwBieb() {
+      const inhoud = document.getElementById("biebInhoud");
+      document.querySelectorAll(".inst-knop").forEach(function (knop) {
+        knop.setAttribute("aria-selected", knop.getAttribute("data-instrument") === instrument ? "true" : "false");
+      });
+      document.getElementById("biebUitleg").textContent = INSTRUMENTEN[instrument];
+      if (inhoud.getAttribute("data-instrument") === instrument) return;
+      if (!biebCache[instrument]) biebCache[instrument] = bouwInstrument(instrument);
+      inhoud.innerHTML = biebCache[instrument];
+      inhoud.setAttribute("data-instrument", instrument);
+    }
+
+    function kiesInstrument(naam) {
+      if (!INSTRUMENTEN[naam] || naam === instrument) return;
+      instrument = naam;
+      try { localStorage.setItem("keychanger-instrument", naam); } catch (fout) { /* niet erg */ }
+      bouwBieb();
+    }
+    const instKnoppen = Array.prototype.slice.call(document.querySelectorAll(".inst-knop"));
+    instKnoppen.forEach(function (knop, i) {
+      knop.addEventListener("click", function () { kiesInstrument(knop.getAttribute("data-instrument")); });
+      // met de pijltjestoetsen kun je van instrument wisselen
+      knop.addEventListener("keydown", function (e) {
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        e.preventDefault();
+        const volgende = instKnoppen[(i + (e.key === "ArrowRight" ? 1 : instKnoppen.length - 1)) % instKnoppen.length];
+        kiesInstrument(volgende.getAttribute("data-instrument"));
+        volgende.focus();
+      });
+    });
+
     // ---------- Naar de bibliotheek en terug ----------
     // De bibliotheek is "pagina" #akkoorden: de terugknop van je browser of telefoon werkt dus gewoon.
     let biebViaKnop = false;
