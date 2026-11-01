@@ -131,7 +131,6 @@
     }
     .app-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
     .app-heading h1 { margin-bottom:4px; }
-    .logout-app { flex:none; padding:8px 12px; border:1px solid rgba(255,255,255,.4); border-radius:12px; background:rgba(255,255,255,.16); color:#fff; font:inherit; cursor:pointer; }
     .logout-app[hidden] { display:none; }
     h1 {
       margin: 0 0 4px;
@@ -897,6 +896,47 @@
     .saved-card button { padding:9px 12px; border-radius:12px; }
     .saved-empty { text-align:center; opacity:.9; padding:28px 12px; }
     @media(max-width:520px) { .account-row button { flex:1; } }
+
+    /* ---------- Logo iets hoger, uitloggen rechtsboven ---------- */
+    .merk { top: calc(env(safe-area-inset-top, 0px) + 8px); }
+    .vol-knop { top: calc(env(safe-area-inset-top, 0px) + 12px); }
+    .sorteer, body.heeft-vol-knop .sorteer { top: calc(env(safe-area-inset-top, 0px) + 14px); }
+    .logout-app {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 14px);
+      right: calc(env(safe-area-inset-right, 0px) + 16px);
+      z-index: 30;
+      width: 104px;
+      height: 44px;
+      padding: 0;
+      border-radius: 16px;
+      font-family: var(--kop);
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: background 0.2s, transform 0.15s;
+    }
+    @media (hover: hover) { .logout-app:hover { background: rgba(255, 255, 255, 0.28); } }
+    .logout-app:active { transform: scale(0.95); }
+    .logout-app:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
+    body.start .logout-app, body.login-open .logout-app, body.bieb-open .logout-app,
+    body.saved-open .logout-app, body.tekst-vol .logout-app { display: none; }
+    /* Staat uitloggen rechtsboven, dan komt de volledig-scherm-knop ernaast */
+    body.heeft-logout:not(.start):not(.login-open):not(.bieb-open):not(.saved-open) .vol-knop { right: calc(env(safe-area-inset-right, 0px) + 130px); }
+    @media (max-width: 520px) {
+      .merk { top: calc(env(safe-area-inset-top, 0px) + 14px); }
+      .vol-knop { top: calc(env(safe-area-inset-top, 0px) + 14px); }
+      .sorteer, body.heeft-vol-knop .sorteer { top: calc(env(safe-area-inset-top, 0px) + 16px); }
+      .logout-app { top: calc(env(safe-area-inset-top, 0px) + 16px); right: calc(env(safe-area-inset-right, 0px) + 12px); }
+      body.heeft-logout:not(.start):not(.login-open):not(.bieb-open):not(.saved-open) .vol-knop { right: calc(env(safe-area-inset-right, 0px) + 126px); }
+    }
+
+    /* Dubbeltikken mag geen inzoomen of tekst selecteren veroorzaken */
+    html { touch-action: manipulation; }
+    body { -webkit-user-select: none; user-select: none; }
+    textarea, input, .dlg-veld { -webkit-user-select: text; user-select: text; }
   </style>
 </head>
 <body class="start">
@@ -977,11 +1017,11 @@
       <path d="M35 15 C44 18 49 24 46 34 C45 28 41 25 35 24 Z" fill="#fff"/>
     </svg>
   </a>
+  <!-- Uitloggen: rechtsboven op het scherm (alleen op de gewone pagina, en alleen als je bent ingelogd) -->
+  <button class="logout-app glass" id="logoutAppBtn" type="button" hidden>Uitloggen</button>
+
   <main class="kaart glass">
-    <div class="app-heading">
-      <h1>KeyChanger</h1>
-      <button class="logout-app" id="logoutAppBtn" type="button" hidden>Uitloggen</button>
-    </div>
+    <h1>KeyChanger</h1>
     <p class="ondertitel">Zet je akkoorden in een andere toonsoort en zie meteen welke capo je nodig hebt.</p>
     <div class="eq" id="eq" aria-hidden="true"></div>
     <div class="tekstdoos" id="tekstdoos">
@@ -1488,7 +1528,8 @@
     // iPhone-Safari laat websites niet schermvullend gaan: daar vult het tekstvak gewoon het hele scherm van de pagina
     // Staat de site als app geïnstalleerd (beginscherm), dan vult hij het scherm al zelf: dan is er geen volledig-scherm-knop en vragen we de browser er niets over
     const alApp = navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches || window.matchMedia("(display-mode: fullscreen)").matches || window.matchMedia("(display-mode: minimal-ui)").matches;
-    const fsMogelijk = !alApp && !!vraagFs && fsToegestaan !== false;
+    const fsKan = !!vraagFs && fsToegestaan !== false;      // kan de browser schermvullend? (ook in de app)
+    const fsMogelijk = !alApp && fsKan;                     // alleen op de website tonen we de knop
     function fsElement() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
     function gaFs(bijFout) {
       try {
@@ -1512,6 +1553,33 @@
       volKnop.title = t;
     }
     volKnop.addEventListener("click", function () { if (fsElement()) verlaatFs(); else gaFs(); });
+
+    // ---------- Dubbel tikken (of dubbelklikken) op het scherm = volledig scherm aan, nog een keer = weer uit ----------
+    // Knoppen, invulvelden, de toonhoogte-wielen en de tekstvakken doen hun eigen ding en tellen niet mee.
+    const GEEN_DUBBELTIK = 'button, a, input, textarea, select, label, [role="slider"], [role="switch"], .wiel, .dlg-achter, .tekstdoos.vol, .sorteer, .zoom-balk';
+    let tikStart = null, laatsteTik = null;
+    document.addEventListener("pointerdown", function (e) { tikStart = { x: e.clientX, y: e.clientY }; }, true);
+    document.addEventListener("pointerup", function (e) {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      const verschoven = tikStart ? Math.hypot(e.clientX - tikStart.x, e.clientY - tikStart.y) : 0;
+      if (verschoven > 12 || (e.target.closest && e.target.closest(GEEN_DUBBELTIK))) { laatsteTik = null; return; }
+      const nu = Date.now();
+      if (laatsteTik && nu - laatsteTik.t < 400 && Math.hypot(e.clientX - laatsteTik.x, e.clientY - laatsteTik.y) < 40) {
+        laatsteTik = null;
+        wisselVolScherm();
+      } else {
+        laatsteTik = { t: nu, x: e.clientX, y: e.clientY };
+      }
+    }, true);
+    function wisselVolScherm() {
+      if (fsElement()) { verlaatFs(); return; }
+      if (fsKan) {
+        gaFs(function () { toonMelding("Volledig scherm is nu niet mogelijk."); });
+      } else if (typeof isApple !== "undefined" && isApple) {
+        toonMelding("Safari op iPhone heeft geen volledig scherm. Zet KeyChanger op je beginscherm om hem schermvullend te openen.");
+      }
+      try { window.getSelection().removeAllRanges(); } catch (fout) { /* niet erg */ }
+    }
 
     // ---------- Tekstvak over het hele scherm (wit met zwarte letters) ----------
     const tekstdoos = document.getElementById("tekstdoos");
@@ -1962,6 +2030,7 @@
       authForm.hidden = !!huidigeGebruiker;
       signedIn.hidden = !huidigeGebruiker;
       document.getElementById("logoutAppBtn").hidden = !huidigeGebruiker;
+      document.body.classList.toggle("heeft-logout", !!huidigeGebruiker);
       document.getElementById("userEmail").textContent = huidigeGebruiker ? huidigeGebruiker.email : "";
       if (huidigeGebruiker) {
         statusAccount("Ingelogd. Je teksten worden aan dit account gekoppeld.");
