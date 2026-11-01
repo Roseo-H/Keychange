@@ -350,6 +350,37 @@
     .installeer[hidden], .home-ios[hidden] { display: none; }
     .home-ios { margin: 0; max-width: 340px; font-size: 14px; font-weight: 300; opacity: 0.95; }
 
+    /* ---------- Knop rechtsboven: volledig scherm aan/uit (alleen op de website, niet in de app) ---------- */
+    .vol-knop {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 16px);
+      right: calc(env(safe-area-inset-right, 0px) + 16px);
+      z-index: 30;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .vol-knop[hidden] { display: none; }
+    .vol-knop svg { width: 24px; height: 24px; display: block; }
+    .vol-knop .ico-uit { display: none; }
+    .vol-knop.is-vol .ico-in { display: none; }
+    .vol-knop.is-vol .ico-uit { display: block; }
+    @media (hover: hover) { .vol-knop:hover { background: rgba(255, 255, 255, 0.28); } }
+    .vol-knop:active { transform: scale(0.92); }
+    .vol-knop:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.95); outline-offset: 3px; }
+    body.tekst-vol .vol-knop, body.login-open .vol-knop { visibility: hidden; }
+    @media (max-width: 520px) { .vol-knop { top: calc(env(safe-area-inset-top, 0px) + 22px); right: calc(env(safe-area-inset-right, 0px) + 12px); } }
+    /* De sorteerkeuze schuift op als de volledig-scherm-knop er ook staat */
+    body.heeft-vol-knop .sorteer { right: calc(env(safe-area-inset-right, 0px) + 74px); }
+    @media (max-width: 520px) { body.heeft-vol-knop .sorteer { top: calc(env(safe-area-inset-top, 0px) + 24px); right: calc(env(safe-area-inset-right, 0px) + 70px); } }
+
     /* ---------- Aparte inlogpagina ---------- */
     body.login-open { overflow: hidden; min-height: 100vh; min-height: 100dvh; }
     body.login-open .kaart, body.login-open .merk, body.login-open .bieb,
@@ -924,6 +955,12 @@
   </section>
     </div>
   </section>
+  <!-- Volledig scherm aan/uit (rechtsboven). Alleen op de website, in de geïnstalleerde app niet -->
+  <button class="vol-knop glass" id="volKnop" type="button" aria-label="Volledig scherm" title="Volledig scherm" hidden>
+    <svg class="ico-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+    <svg class="ico-uit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3a2 2 0 0 0 2-2V3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M21 16h-3a2 2 0 0 0-2 2v3"/></svg>
+  </button>
+
   <div class="melding glass" id="melding" role="status" aria-live="polite"></div>
   <!-- Logo links boven: op de gewone pagina zet je er alles mee terug, in de bibliotheek ga je ermee terug naar de gewone pagina -->
   <a class="merk" id="logo" href="./" aria-label="KeyChanger, alles terugzetten" title="Alles terugzetten">
@@ -1449,7 +1486,9 @@
     const vraagFs = wortel.requestFullscreen || wortel.webkitRequestFullscreen;
     const fsToegestaan = document.fullscreenEnabled !== undefined ? document.fullscreenEnabled : document.webkitFullscreenEnabled;
     // iPhone-Safari laat websites niet schermvullend gaan: daar vult het tekstvak gewoon het hele scherm van de pagina
-    const fsMogelijk = !!vraagFs && fsToegestaan !== false;
+    // Staat de site als app geïnstalleerd (beginscherm), dan vult hij het scherm al zelf: dan is er geen volledig-scherm-knop en vragen we de browser er niets over
+    const alApp = navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches || window.matchMedia("(display-mode: fullscreen)").matches || window.matchMedia("(display-mode: minimal-ui)").matches;
+    const fsMogelijk = !alApp && !!vraagFs && fsToegestaan !== false;
     function fsElement() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
     function gaFs(bijFout) {
       try {
@@ -1462,7 +1501,17 @@
       if (!uit) return;
       try { const p = uit.call(document); if (p && p.catch) p.catch(function () {}); } catch (fout) { /* niet erg */ }
     }
-    function updateFsKnop() { /* er is geen aparte knop voor volledig scherm meer */ }
+    const volKnop = document.getElementById("volKnop");
+    volKnop.hidden = !fsMogelijk;
+    document.body.classList.toggle("heeft-vol-knop", fsMogelijk);
+    function updateFsKnop() {
+      const aan = !!fsElement();
+      volKnop.classList.toggle("is-vol", aan);
+      const t = aan ? "Volledig scherm verlaten" : "Volledig scherm";
+      volKnop.setAttribute("aria-label", t);
+      volKnop.title = t;
+    }
+    volKnop.addEventListener("click", function () { if (fsElement()) verlaatFs(); else gaFs(); });
 
     // ---------- Tekstvak over het hele scherm (wit met zwarte letters) ----------
     const tekstdoos = document.getElementById("tekstdoos");
@@ -2392,7 +2441,6 @@
       installeerEvent.userChoice.then(() => {}, () => {}).then(() => { installeerEvent = null; installeerKnop.hidden = true; });
     });
     window.addEventListener("appinstalled", () => { installeerKnop.hidden = true; });
-    const alApp = navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
     const isApple = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     if (isApple && !alApp) document.getElementById("homeIos").hidden = false;
 
