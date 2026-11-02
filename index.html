@@ -842,9 +842,10 @@
     .account-status { margin:8px 0 0; font-size:13px; opacity:.9; }
     .tekst-acties { display:flex; gap:10px; margin-top:10px; align-items:flex-start; }
     .tekst-kopie-stack { flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:8px; }
-    .tekst-acties .tekst-kopie-stack, .tekst-acties .save-knop { width:50%; }
+    .tekst-acties .tekst-kopie-stack, .tekst-acties .tekst-opslaan-stack { width:50%; }
+    .tekst-opslaan-stack { flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:8px; }
     .tekst-acties .kopieer-knop { width:100%; margin-top:0; min-height:48px; flex:1 1 auto; }
-    .tekst-acties .save-knop { flex:1 1 0; margin-top:0; min-height:48px; align-self:flex-start; }
+    .tekst-acties .tekst-opslaan-stack .save-knop { width:100%; flex:1 1 auto; margin-top:0; min-height:48px; align-self:stretch; }
     .detect-key-knop {
       width:100%; min-height:48px; padding:10px 12px; border-radius:16px;
       display:flex; align-items:center; justify-content:center; gap:9px;
@@ -857,9 +858,21 @@
     .detect-key-knop:focus-visible { outline:3px solid rgba(255,255,255,.95); outline-offset:3px; }
     @media (hover:hover) { .detect-key-knop:hover { background:rgba(255,255,255,.28); } }
     .tekstdoos.vol .tekst-kopie-stack { display:contents; }
-    .tekstdoos.vol .detect-key-knop { display:none; }
+    .tekstdoos.vol .detect-key-knop, .tekstdoos.vol .document-invoegen-knop { display:none; }
     .save-knop { display:flex; align-items:center; justify-content:center; border-radius:16px; padding:12px; }
     .save-knop svg { width:22px; height:22px; }
+    .document-invoegen-knop {
+      width:100%; min-height:48px; padding:10px 12px; border-radius:16px;
+      display:flex; align-items:center; justify-content:center; gap:9px;
+      color:#fff; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.4);
+      font:600 14px var(--kop); cursor:pointer; -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation; transition:background .2s,transform .15s;
+    }
+    .document-invoegen-knop svg { width:22px; height:22px; flex:none; }
+    .document-invoegen-knop:active { transform:scale(.97); }
+    .document-invoegen-knop:focus-visible { outline:3px solid rgba(255,255,255,.95); outline-offset:3px; }
+    @media (hover:hover) { .document-invoegen-knop:hover { background:rgba(255,255,255,.28); } }
+    .document-invoegen-knop:disabled { opacity:.65; cursor:wait; }
     .tekstdoos.vol .save-knop { position:absolute; z-index:2; width:44px; height:44px; min-height:44px; padding:0; right:calc(env(safe-area-inset-right, 0px) + 68px); bottom:calc(env(safe-area-inset-bottom, 0px) + 14px); border-radius:12px; background:#eef2f7; color:#111; border:1px solid #cfd8e3; }
     .tekstdoos.vol .kopieer-knop, .tekstdoos.vol .save-knop {
       background:#eef2f7 !important; border:1px solid #cfd8e3 !important;
@@ -1086,9 +1099,16 @@
           <span>Detect Key</span>
         </button>
       </div>
-      <button class="save-knop glass" id="saveTextBtn" type="button" aria-label="Tekst opslaan" title="Tekst opslaan">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
-      </button>
+      <div class="tekst-opslaan-stack">
+        <button class="save-knop glass" id="saveTextBtn" type="button" aria-label="Tekst opslaan" title="Tekst opslaan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+        </button>
+        <button class="document-invoegen-knop glass" id="documentInvoegenKnop" type="button" title="Document, PDF of afbeelding invoegen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <span>Document invoegen</span>
+        </button>
+      </div>
+      <input id="documentBestand" type="file" accept="image/*,.pdf,.docx,.txt,.rtf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" hidden>
       </div>
       <button class="tekst-vol-knop glass" id="tekstVol" type="button" aria-label="Tekstvak over het hele scherm" title="Tekstvak over het hele scherm">
         <svg class="ico-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
@@ -2524,6 +2544,125 @@
       if (location.hash === "#opgeslagen") laadOpgeslagenTeksten();
     }
     document.getElementById("saveTextBtn").addEventListener("click", slaTekstOp);
+
+    // ---------- Document invoegen: tekst en akkoorden uit bestanden halen ----------
+    const documentInvoegenKnop = document.getElementById("documentInvoegenKnop");
+    const documentBestand = document.getElementById("documentBestand");
+    let documentBezig = false;
+
+    function laadExterneScript(url, test) {
+      if (test && test()) return Promise.resolve();
+      return new Promise(function (resolve, reject) {
+        const bestaand = document.querySelector('script[data-kc-lib="' + url + '"]');
+        if (bestaand) {
+          bestaand.addEventListener("load", resolve, { once:true });
+          bestaand.addEventListener("error", reject, { once:true });
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = url; script.async = true; script.dataset.kcLib = url;
+        script.onload = resolve; script.onerror = function () { reject(new Error("Een benodigde documentbibliotheek kon niet worden geladen.")); };
+        document.head.appendChild(script);
+      });
+    }
+
+    async function leesPdf(bestand) {
+      await laadExterneScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js", function(){ return !!window.pdfjsLib; });
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await bestand.arrayBuffer()) }).promise;
+      const paginaTeksten = [];
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const pagina = await pdf.getPage(p);
+        const inhoud = await pagina.getTextContent();
+        // Groepeer PDF-tekst op dezelfde basislijn en sorteer regels van boven naar beneden.
+        const regels = new Map();
+        inhoud.items.forEach(function(item){
+          const waarde = (item.str || "").trim();
+          if (!waarde) return;
+          const y = Math.round((item.transform && item.transform[5]) || 0);
+          if (!regels.has(y)) regels.set(y, []);
+          regels.get(y).push({ x: (item.transform && item.transform[4]) || 0, tekst: waarde });
+        });
+        let tekst = Array.from(regels.entries()).sort(function(a,b){ return b[0]-a[0]; })
+          .map(function(regel){ return regel[1].sort(function(a,b){ return a.x-b.x; }).map(function(item){ return item.tekst; }).join(" "); })
+          .join("\n").trim();
+        // Sommige PDF's bestaan alleen uit scans; voer dan OCR uit op de pagina.
+        if (tekst.replace(/\s/g, "").length < 12) {
+          const viewport = pagina.getViewport({ scale: 1.8 });
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.ceil(viewport.width); canvas.height = Math.ceil(viewport.height);
+          await pagina.render({ canvasContext: canvas.getContext("2d"), viewport: viewport }).promise;
+          tekst = await herkenAfbeelding(canvas);
+        }
+        if (tekst) paginaTeksten.push(tekst);
+      }
+      return paginaTeksten.join("\n\n");
+    }
+
+    async function herkenAfbeelding(bron) {
+      await laadExterneScript("https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js", function(){ return !!window.Tesseract; });
+      const resultaat = await Tesseract.recognize(bron, "eng+nld", {
+        logger: function(info) {
+          if (info.status === "recognizing text" && info.progress) {
+            documentInvoegenKnop.querySelector("span").textContent = "Tekst herkennen " + Math.round(info.progress * 100) + "%";
+          }
+        }
+      });
+      return resultaat.data.text || "";
+    }
+
+    async function leesDocument(bestand) {
+      const naam = bestand.name.toLowerCase();
+      if (bestand.type === "application/pdf" || naam.endsWith(".pdf")) return await leesPdf(bestand);
+      if (naam.endsWith(".docx") || bestand.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+        await laadExterneScript("https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js", function(){ return !!window.mammoth; });
+        const resultaat = await mammoth.extractRawText({ arrayBuffer: await bestand.arrayBuffer() });
+        return resultaat.value || "";
+      }
+      if (bestand.type.startsWith("image/")) return await herkenAfbeelding(bestand);
+      if (naam.endsWith(".txt") || naam.endsWith(".rtf") || bestand.type.startsWith("text/")) {
+        let inhoud = await bestand.text();
+        if (naam.endsWith(".rtf")) inhoud = inhoud.replace(/\\par\b/g,"\n").replace(/\\'[0-9a-f]{2}/gi," ").replace(/\\[a-z]+-?\d* ?|[{}]/g," ");
+        return inhoud;
+      }
+      throw new Error("Dit bestandstype wordt niet ondersteund. Gebruik een afbeelding, PDF, DOCX of tekstbestand.");
+    }
+
+    documentInvoegenKnop.addEventListener("click", function(){
+      if (!documentBezig) documentBestand.click();
+    });
+    documentBestand.addEventListener("change", async function(){
+      const bestand = documentBestand.files && documentBestand.files[0];
+      if (!bestand) return;
+      if (tekstvak.value.trim() && !window.confirm("De huidige tekst in het tekstvak vervangen door de inhoud van dit document?")) {
+        documentBestand.value = ""; return;
+      }
+      documentBezig = true;
+      documentInvoegenKnop.disabled = true;
+      const label = documentInvoegenKnop.querySelector("span");
+      const oudeLabel = "Document invoegen";
+      label.textContent = "Document lezen...";
+      try {
+        const herkendeTekst = (await leesDocument(bestand)).replace(/\r/g,"\n").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"").trim();
+        if (!herkendeTekst) throw new Error("Ik kon geen leesbare tekst vinden in dit bestand.");
+        // De tekst wordt in de leesvolgorde van pagina's/regels overgenomen; lege regels blijven behouden.
+        tekstvak.value = herkendeTekst.replace(/\n[ \t]+/g,"\n").replace(/\n{3,}/g,"\n\n");
+        tekstvak.dispatchEvent(new Event("input", { bubbles:true }));
+        tekstvak.scrollTop = 0;
+        if (shorter) {
+          shorter = false; volleTekst = null; verkortTekst = null;
+          const schakel = document.getElementById("shorter");
+          if (schakel) schakel.setAttribute("aria-checked", "false");
+        }
+        toonMelding("Document ingelezen. Controleer de akkoorden en tekst even op herkenningsfouten.");
+      } catch (fout) {
+        console.error("Document invoegen:", fout);
+        toonMelding(fout.message || "Het document kon niet worden gelezen.");
+      } finally {
+        documentBezig = false; documentInvoegenKnop.disabled = false;
+        label.textContent = oudeLabel; documentBestand.value = "";
+      }
+    });
 
     // ---------- Opgeslagen teksten: lijst en sorteren ----------
     let opgeslagen = [];                   // alle teksten van deze gebruiker
