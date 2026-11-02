@@ -840,11 +840,32 @@
     .account-row button, .saved-card button, .save-knop { border:1px solid rgba(255,255,255,.4); color:#fff; background:rgba(255,255,255,.16); font:inherit; font-weight:600; cursor:pointer; }
     .account-row button { padding:10px 14px; border-radius:12px; }
     .account-status { margin:8px 0 0; font-size:13px; opacity:.9; }
-    .tekst-acties { display:flex; gap:10px; margin-top:10px; }
-    .tekst-acties .kopieer-knop, .tekst-acties .save-knop { flex:1; width:50%; margin-top:0; min-height:48px; }
+    .tekst-acties { display:flex; gap:10px; margin-top:10px; align-items:flex-start; }
+    .tekst-kopie-stack { flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:8px; }
+    .tekst-acties .tekst-kopie-stack, .tekst-acties .save-knop { width:50%; }
+    .tekst-acties .kopieer-knop { width:100%; margin-top:0; min-height:48px; flex:1 1 auto; }
+    .tekst-acties .save-knop { flex:1 1 0; margin-top:0; min-height:48px; align-self:flex-start; }
+    .detect-key-knop {
+      width:100%; min-height:48px; padding:10px 12px; border-radius:16px;
+      display:flex; align-items:center; justify-content:center; gap:9px;
+      font-family:var(--kop); font-size:15px; font-weight:800; letter-spacing:.2px;
+      cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+      transition:background .2s, transform .15s;
+    }
+    .detect-key-knop svg { width:22px; height:22px; flex:none; display:block; }
+    .detect-key-knop:active { transform:scale(.97); }
+    .detect-key-knop:focus-visible { outline:3px solid rgba(255,255,255,.95); outline-offset:3px; }
+    @media (hover:hover) { .detect-key-knop:hover { background:rgba(255,255,255,.28); } }
+    .tekstdoos.vol .tekst-kopie-stack { display:contents; }
+    .tekstdoos.vol .detect-key-knop { display:none; }
     .save-knop { display:flex; align-items:center; justify-content:center; border-radius:16px; padding:12px; }
     .save-knop svg { width:22px; height:22px; }
     .tekstdoos.vol .save-knop { position:absolute; z-index:2; width:44px; height:44px; min-height:44px; padding:0; right:calc(env(safe-area-inset-right, 0px) + 68px); bottom:calc(env(safe-area-inset-bottom, 0px) + 14px); border-radius:12px; background:#eef2f7; color:#111; border:1px solid #cfd8e3; }
+    .tekstdoos.vol .kopieer-knop, .tekstdoos.vol .save-knop {
+      background:#eef2f7 !important; border:1px solid #cfd8e3 !important;
+      box-shadow:none !important; text-shadow:none !important;
+      -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+    }
     .saved-page { display:none; position:relative; z-index:1; width:min(900px,100%); }
     body.saved-open .kaart, body.saved-open .bieb { display:none !important; }
     body.saved-open .saved-page { display:block; animation:verschijn .5s ease backwards; }
@@ -1055,10 +1076,16 @@
       <textarea id="tekst" class="glass" spellcheck="false" autocomplete="off" placeholder="Typ of plak hier je akkoorden of songtekst..."></textarea>
       <!-- Kopiëren en opslaan staan naast elkaar onder het tekstvak -->
       <div class="tekst-acties">
-      <button class="kopieer-knop glass" id="kopieerKnop" type="button" aria-label="Alle tekst kopiëren" title="Alle tekst kopiëren">
-        <svg class="ico-kopie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><rect x="4" y="4" width="11" height="11" rx="2"></rect></svg>
-        <svg class="ico-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-      </button>
+      <div class="tekst-kopie-stack">
+        <button class="kopieer-knop glass" id="kopieerKnop" type="button" aria-label="Alle tekst kopiëren" title="Alle tekst kopiëren">
+          <svg class="ico-kopie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><rect x="4" y="4" width="11" height="11" rx="2"></rect></svg>
+          <svg class="ico-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+        </button>
+        <button class="detect-key-knop glass" id="detectKeyKnop" type="button" aria-label="Detect Key: originele toonhoogte automatisch bepalen" title="Detect Key: bepaal de originele toonhoogte">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          <span>Detect Key</span>
+        </button>
+      </div>
       <button class="save-knop glass" id="saveTextBtn" type="button" aria-label="Tekst opslaan" title="Tekst opslaan">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
       </button>
@@ -1759,6 +1786,15 @@
     tekstVolKnop.addEventListener("click", function () {
       if (tekstVolOpen()) sluitTekstVol(); else openTekstVol();
     });
+    tekstvak.addEventListener("dblclick", function (e) {
+      if (e.target !== tekstvak) return;
+      if (!tekstVolOpen()) {
+        openTekstVol();
+      } else if (fsMogelijk && !fsElement()) {
+        tekstFsZelf = true;
+        gaFs(function () { tekstFsZelf = false; });
+      }
+    });
     document.addEventListener("keydown", function (e) {
       if (e.key !== "Escape") return;
       if (tekstVolOpen()) sluitTekstVol();
@@ -1806,6 +1842,108 @@
         if (!tekstVolOpen()) toonMelding("Kopiëren mislukt. Selecteer de tekst en kopieer hem zelf.");
       });
     });
+    // ---------- Detect Key: schat de originele toonsoort uit de akkoorden ----------
+    // In majeur volgen de diatonische drieklanken I-ii-iii-IV-V-vi-vii°;
+    // in natuurlijk mineur i-ii°-III-iv-v-VI-VII. Uitbreidingen zoals 7/maj7/m7
+    // behouden voor deze herkenning de kwaliteit van de onderliggende drieklank.
+    const detectKeyKnop = document.getElementById("detectKeyKnop");
+    function detecteerToonsoort(tekst) {
+      const gevonden = [];
+      const patroon = akkoordPatroon();
+      let m;
+      while ((m = patroon.exec(tekst)) !== null) {
+        const letter = m[2].toUpperCase();
+        const teken = m[3];
+        const uitbreiding = (m[4] || "").toLowerCase();
+        const root = (basis[letter] + (teken === "#" ? 1 : teken === "b" ? 11 : 0)) % 12;
+        let kwaliteit = "major";
+        if (/^(?:m(?!aj)|min)/.test(uitbreiding)) kwaliteit = "minor";
+        if (/^(?:dim|°|ø)|m7b5/.test(uitbreiding)) kwaliteit = "dim";
+        // sus- en powerchords geven wel een grondtoon, maar geen betrouwbare majeur/mineurkwaliteit.
+        if (/^(?:sus|5)(?:$|[^a-z])/.test(uitbreiding)) kwaliteit = "unknown";
+        gevonden.push({ root, kwaliteit });
+      }
+      if (gevonden.length < 2 || new Set(gevonden.map(x => x.root)).size < 2) return null;
+
+      const namen = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+      const kandidaten = [];
+      for (let tonic = 0; tonic < 12; tonic++) {
+        for (const mode of ["major", "minor"]) {
+          const afstanden = mode === "major" ? [0,2,4,5,7,9,11] : [0,2,3,5,7,8,10];
+          const kwaliteiten = mode === "major"
+            ? ["major","minor","minor","major","major","minor","dim"]
+            : ["minor","dim","major","minor","minor","major","major"];
+          const ladder = new Map(afstanden.map((afstand, i) => [(tonic + afstand) % 12, kwaliteiten[i]]));
+          let score = 0;
+          let exacteKwaliteiten = 0;
+          let binnenToonsoort = 0;
+          for (const akkoord of gevonden) {
+            const verwacht = ladder.get(akkoord.root);
+            if (verwacht === undefined) {
+              score -= 1.15;
+            } else {
+              binnenToonsoort++;
+              score += akkoord.kwaliteit === "unknown" ? 0.85 : 0.45;
+              if (akkoord.kwaliteit !== "unknown" && akkoord.kwaliteit === verwacht) {
+                score += 1.8;
+                exacteKwaliteiten++;
+              } else if (akkoord.kwaliteit !== "unknown") {
+                score -= 0.55;
+              }
+            }
+            // Een akkoord op de tonica is een kleine aanwijzing, geen doorslaggevend bewijs.
+            if (akkoord.root === tonic) score += 0.18;
+          }
+          // Het eerste of laatste akkoord is vaak de tonica; gebruik dit alleen als lichte aanwijzing.
+          if (gevonden[0].root === tonic) score += 0.35;
+          if (gevonden[gevonden.length - 1].root === tonic) score += 0.2;
+          // Bij volledig gelijkwaardige relatieve toonsoorten kiezen we voorzichtig vaker majeur.
+          if (mode === "major") score += 0.08;
+          // Majeur/mineur onderscheiden we mede aan de kwaliteit van het tonica-akkoord.
+          const tonicaAkkoorden = gevonden.filter(a => a.root === tonic);
+          for (const a of tonicaAkkoorden) {
+            if (a.kwaliteit === (mode === "major" ? "major" : "minor")) score += 0.45;
+          }
+          kandidaten.push({ tonic, mode, score, exacteKwaliteiten, binnenToonsoort });
+        }
+      }
+      kandidaten.sort((a,b) => b.score - a.score);
+      const beste = kandidaten[0], tweede = kandidaten[1];
+      if (!beste || beste.binnenToonsoort < 2) return null;
+      // Bij een vrijwel gelijke score melden we een voorzichtige schatting, maar kiezen wel de beste kandidaat.
+      return {
+        naam: namen[beste.tonic] + (beste.mode === "minor" ? " mineur" : ""),
+        index: beste.tonic,
+        mode: beste.mode,
+        score: beste.score,
+        verschil: beste.score - (tweede ? tweede.score : 0),
+        aantal: gevonden.length,
+        binnen: beste.binnenToonsoort,
+        exact: beste.exacteKwaliteiten
+      };
+    }
+    detectKeyKnop.addEventListener("click", function () {
+      const tekstVoorAnalyse = shorter && volleTekst !== null && tekstvak.value === verkortTekst
+        ? volleTekst : tekstvak.value;
+      if (!tekstVoorAnalyse.trim()) {
+        toonMelding("Plak eerst een tekst met akkoorden.");
+        return;
+      }
+      const resultaat = detecteerToonsoort(tekstVoorAnalyse);
+      if (!resultaat) {
+        toonMelding("Ik kan nog geen toonsoort bepalen. Voeg minstens twee verschillende akkoorden toe.");
+        return;
+      }
+      stand.orig = resultaat.index;
+      if (!nieuwGekozen) stand.nieuw = resultaat.index;
+      // De tekst zoals hij nu in beeld staat is vanaf dit moment het nieuwe nulpunt.
+      toegepast = 0;
+      toon();
+      pulseer();
+      toonMelding("Geschatte originele toonsoort: " + resultaat.naam +
+        " (" + resultaat.exact + " akkoordkwaliteiten passend).");
+    });
+
     // =====================================================================
     //  AKKOORDENBIBLIOTHEEK
     // =====================================================================
