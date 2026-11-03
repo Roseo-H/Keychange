@@ -415,6 +415,15 @@
     .login-page .account-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
     .account-row[hidden] { display: none; }
     .login-page .account-row input { width: 100%; min-height: 50px; font-size: 16px; }
+
+    .password-wrap { position:relative; width:100%; }
+    .password-wrap input { width:100%; padding-right:54px !important; }
+    .password-eye { position:absolute; right:7px; top:50%; transform:translateY(-50%);
+      width:42px; height:42px; display:grid; place-items:center; border:0; border-radius:12px;
+      color:#fff; background:transparent; cursor:pointer; touch-action:manipulation; }
+    .password-eye svg { width:21px; height:21px; }
+    .password-eye:focus-visible { outline:2px solid #fff; outline-offset:1px; }
+
     .login-page .account-row button { min-height: 48px; border-radius: 14px; }
     .login-page .account-status { min-height: 2.8em; line-height: 1.4; overflow-wrap: anywhere; }
     .login-back-text { margin-top: 16px; border: 0; background: transparent; color: white; font: inherit; cursor: pointer; opacity: .85; }
@@ -473,9 +482,10 @@
       border-radius: 0;
       box-shadow: none;
       touch-action: pan-y;
-      overflow-wrap: anywhere;      /* bij inzoomen gaat de tekst onder elkaar, niets valt buiten beeld */
+      overflow-wrap: normal;      /* breek woorden niet middenin; laat de browser op spaties afbreken */
+      word-break: normal;
       white-space: pre-wrap;
-      font-size: calc(20px * var(--zoom, 1));   /* --zoom gaat van 1 (100%) tot 3 (300%) */
+      font-size: calc(20px * var(--zoom, 1));   /* --zoom gaat van 0,4 (40%) tot 3 (300%) */
       line-height: 1.6;
       padding:
         calc(env(safe-area-inset-top, 0px) + 22px)
@@ -1050,7 +1060,12 @@
     <section class="account-pane glass" aria-label="Account">
       <div class="account-row" id="authForm">
         <input id="authEmail" type="email" autocomplete="email" placeholder="E-mailadres" aria-label="E-mailadres">
-        <input id="authPassword" type="password" autocomplete="current-password" placeholder="Wachtwoord" aria-label="Wachtwoord">
+        <div class="password-wrap">
+          <input id="authPassword" type="password" autocomplete="current-password" placeholder="Wachtwoord" aria-label="Wachtwoord">
+          <button class="password-eye" id="passwordEye" type="button" aria-label="Wachtwoord tonen" aria-pressed="false" title="Wachtwoord tonen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
         <button type="button" id="signInBtn">Inloggen</button>
         <button type="button" id="signUpBtn">Account maken</button>
         <button type="button" id="guestBtn" class="gast-knop">Zonder inloggen verder gaan</button>
@@ -1129,7 +1144,7 @@
       <!-- Zoom-balk voor laptop of computer: links 100%, rechts 300% -->
       <div class="zoom-balk" id="zoomBalk">
         <span>100%</span>
-        <input type="range" id="zoomSchuif" min="100" max="300" step="5" value="100" aria-label="Inzoomen op de tekst" aria-valuetext="100%">
+        <input type="range" id="zoomSchuif" min="40" max="300" step="5" value="100" aria-label="Inzoomen op de tekst" aria-valuetext="100%">
         <span>300%</span>
       </div>
     </div>
@@ -1234,7 +1249,7 @@
     </div>
     <div class="zoom-balk">
       <span>100%</span>
-      <input type="range" id="vZoom" min="100" max="300" step="5" value="100" aria-label="Inzoomen op de tekst" aria-valuetext="100%">
+      <input type="range" id="vZoom" min="40" max="300" step="5" value="100" aria-label="Inzoomen op de tekst" aria-valuetext="100%">
       <span>300%</span>
     </div>
   </div>
@@ -1731,7 +1746,7 @@
     // ---------- Inzoomen: 100% (1) tot 300% (3). De letters worden groter, de tekst loopt door op de volgende regel ----------
     let tekstZoom = 1;
     function zetZoom(z) {
-      const nieuw = Math.min(3, Math.max(1, z));
+      const nieuw = Math.min(3, Math.max(0.4, z));
       if (Math.abs(nieuw - tekstZoom) < 0.001) return;
       // Onthoud waar je was in de tekst, zodat je na het zoomen niet ineens ergens anders staat
       const verhouding = tekstvak.scrollTop / (tekstvak.scrollHeight || 1);
@@ -2467,6 +2482,14 @@
       }
     }
     document.getElementById("signInBtn").addEventListener("click", () => accountActie("signin"));
+    document.getElementById("passwordEye").addEventListener("click", function() {
+      const veld = document.getElementById("authPassword");
+      const tonen = veld.type === "password";
+      veld.type = tonen ? "text" : "password";
+      this.setAttribute("aria-pressed", tonen ? "true" : "false");
+      this.setAttribute("aria-label", tonen ? "Wachtwoord verbergen" : "Wachtwoord tonen");
+      this.title = tonen ? "Wachtwoord verbergen" : "Wachtwoord tonen";
+    });
     // Enter in een van de velden = inloggen
     ["authEmail", "authPassword"].forEach(id => document.getElementById(id).addEventListener("keydown", e => {
       if (e.key === "Enter") { e.preventDefault(); accountActie("signin"); }
@@ -2594,7 +2617,7 @@
       const breedtes = geldig.map(function(f) {
         return f.breedte > 0 ? f.breedte / Math.max(1, f.tekst.trim().length) : 0;
       }).filter(function(n) { return n > 0.5 && n < 40; }).sort(function(a,b){ return a-b; });
-      const tekenBreedte = breedtes.length ? breedtes[Math.floor(breedtes.length / 2)] : 6;
+      const tekenBreedte = breedtes.length ? breedtes[Math.floor(breedtes.length / 2)] : 7;
       const minX = Math.min.apply(null, geldig.map(function(f){ return f.x; }));
       const rijen = [];
       geldig.sort(function(a,b){ return b.y-a.y || a.x-b.x; }).forEach(function(f) {
@@ -2618,42 +2641,66 @@
       }).join("\n");
     }
 
-    // Alleen songtekst, akkoordnamen en sectiekoppen houden; drukwerk en muzieksymbolen weghalen.
+    // Schoon songteksten op zonder akkoordregels of echte woorden te beschadigen.
     function normaliseerLiedTekst(bron) {
-      let regels = String(bron || "").replace(/\r/g,"\n")
-        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"")
+      let regels = String(bron || "").replace(/\r\n?/g, "\n")
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
         .split("\n");
-      const koppen = /^(intro|instrumentaal|couplet(?:\s*\d+)?|vers(?:e)?(?:\s*\d+)?|refrein|chorus|bridge|tussenstuk|pre-?chorus|outro|solo|interlude)(?:\s*[:：-].*)?$/i;
+
+      const koppen = /^(intro|instrumentaal|couplet(?:\s*\d+)?|vers(?:e)?(?:\s*\d+)?|refrein|chorus|bridge|tussenstuk|pre[\s-]?chorus|outro|solo|interlude|pre[- ]?refrein)(?:\s*[:：-].*)?$/i;
+      const woorden = new Set((
+        "aandoen alles alleen alle als altijd andere antwoord ben bent beter bij binnen blijf blij boven buiten daar dan dans dat de deze die dit doen door droom een eens elkaar elke en er gaat geen geen geluk gehad gaan gedaan geloof gehoord gewoon haar heb heel hele hem het hier hoe ik in is ja jij jullie je kan keer kijk klein kom komen kon laat later leven liefde lied liefs ligt luisteren maar maak maakt me mee meer mijn mij moet mooi muziek na naar naast nee niet niets nog nu of om omdat onder ons onze op ook opstaan over paar pas praten refrein samen schijn schijnt sinds slaap soms staan staat steeds straks terug te veel tegen terwijl thuis toen toch tot uit van veel verder vergeten verliefd ver weg verliefd vandaag vol voor waarom waren was wat we weer weet wereld werd wie wij wil willen wordt zal ze zeggen zelf zijn zit zo zonder zon zou zullen"
+      ).split(/\s+/));
+
+      function isAkkoordRegel(t) {
+        if (!t || !/[A-G]/i.test(t)) return false;
+        const rest = t.replace(akkoordPatroon(), "").replace(/[\s|,;:()[\]{}\-]/g, "");
+        return rest.length === 0;
+      }
+      function herstelLosseLetters(regel) {
+        const t = regel.trim();
+        if (!t || isAkkoordRegel(t)) return regel;
+        // Alleen een reeks van minimaal drie losse letters samenvoegen als het resultaat
+        // een bekend woord is. Akkoorden (C, Am, F#m, Bb, enz.) worden nooit aangepast.
+        return regel.replace(/(^|[\s([{])((?:[A-Za-zÀ-ÿ]\s+){2,}[A-Za-zÀ-ÿ])(?=$|[\s.,!?;:)\]}])/g,
+          function(heel, voor, reeks) {
+            const kandidaat = reeks.replace(/\s+/g, "").toLowerCase();
+            return woorden.has(kandidaat) ? voor + reeks.replace(/\s+/g, "") : heel;
+          });
+      }
+
       regels = regels.map(function(regel) {
         return regel
-          .replace(/[♪♫♬♩♭♮♯𝄞𝄢𝄡𝄪𝄫]/g, function(teken){ return teken === "♯" ? "#" : " "; })
-          .replace(/[\u2500-\u257F]/g," ")
-          .replace(/[ \t]+$/g,"");
+          .replace(/[♪♫♬♩♭♮𝄞𝄢𝄡𝄪𝄫]/g, " ")
+          .replace(/[\u2500-\u257F]/g, " ")
+          .replace(/[ \t]+$/g, "");
       });
-      // OCR kan letters van één woord uit elkaar trekken, bijvoorbeeld "m ij n" of "m i j n".
-      regels = regels.map(function(regel) {
-        let r = regel.replace(/\b([a-z])\s+([a-z]{2,})\s+([a-z])\b/gi, "$1$2$3");
-        r = r.replace(/\b([a-z](?:\s+[a-z]){2,})\b/gi, function(m){ return m.replace(/\s+/g,""); });
-        return r;
-      });
-      regels = regels.filter(function(regel) {
+
+      // Verwijder alleen duidelijke druk-/metadataregels; songtekst blijft behouden.
+      regels = regels.filter(function(regel, index, alles) {
         const t = regel.trim();
         if (!t) return true;
-        if (/(?:www\.|https?:\/\/|©|copyright|\binfo(?:rmatie)?\b|\blogo\b|pagina\s+\d+|page\s+\d+|tempo\s*:|key\s*:|toonsoort\s*:|composed?\s+by|arranged?\s+by|written?\s+by|uitgeverij\s*:)/i.test(t)) return false;
+        if (/(?:www\.|https?:\/\/|©|copyright|\bpagina\s+\d+\b|\bpage\s+\d+\b|\buitgeverij\s*:|\bcomposed\s+by\b|\barranged\s+by\b|\bwritten\s+by\b)/i.test(t)) return false;
         if (/^\d{1,3}$/.test(t)) return false;
-        // Akkoordregels bestaan vaak uit losse letters met veel tussenruimte (C       G).
-        const restNaAkkoorden = t.replace(akkoordPatroon(), "").replace(/[\s|,;:()[\]{}-]/g, "");
-        if (!restNaAkkoorden && /[A-G]/i.test(t)) return true;
-        const letters = (t.match(/[A-Za-zÀ-ÿ0-9#]/g) || []).length;
-        return letters >= 1 && (letters / Math.max(1,t.length)) >= 0.22;
+        return true;
       });
+
+      regels = regels.map(herstelLosseLetters);
+
+      // Sectiekoppen krijgen precies één lege regel erboven en eronder.
       const uit = [];
       regels.forEach(function(regel) {
         const t = regel.trim();
-        if (t && koppen.test(t) && uit.length && uit[uit.length-1] !== "") uit.push("");
-        uit.push(regel);
+        if (t && koppen.test(t)) {
+          while (uit.length && uit[uit.length - 1] === "") uit.pop();
+          if (uit.length) uit.push("");
+          uit.push(t);
+          uit.push("");
+        } else {
+          uit.push(regel);
+        }
       });
-      return uit.join("\n").replace(/\n{3,}/g,"\n\n").trim();
+      return uit.join("\n").replace(/\n{3,}/g, "\n\n").trim();
     }
 
     async function leesPdf(bestand) {
@@ -2935,7 +2982,7 @@
     vBewerk.addEventListener("click", function () { zetVBewerken(vTekst.readOnly); });
 
     function zetVZoom(z) {
-      const nieuw = Math.min(3, Math.max(1, z));
+      const nieuw = Math.min(3, Math.max(0.4, z));
       if (Math.abs(nieuw - vZoomWaarde) < 0.001) return;
       const verhouding = vTekst.scrollTop / (vTekst.scrollHeight || 1);
       vZoomWaarde = nieuw;
