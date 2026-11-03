@@ -180,6 +180,8 @@
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
+    /* Alleen geïmporteerde akkoordbladen gebruiken vaste letterbreedte voor uitlijning. */
+    .tekstdoos.songtekst textarea { font-family: "Courier New", Consolas, monospace; }
     textarea::placeholder { color: rgba(255, 255, 255, 0.6); }
     textarea:focus {
       border-color: rgba(255, 255, 255, 0.95);
@@ -989,8 +991,14 @@
       body.heeft-logout:not(.start):not(.login-open):not(.bieb-open):not(.saved-open) .vol-knop { right: calc(env(safe-area-inset-right, 0px) + 126px); }
     }
 
-    .login-page .account-row .gast-knop { background: transparent; border: 1px dashed rgba(255,255,255,.65); box-shadow: none; font-weight: 400; }
-    @media (hover: hover) { .login-page .account-row .gast-knop:hover { background: rgba(255,255,255,.14); } }
+    /* Verdergaan zonder account is een gewone, duidelijke knop */
+    .login-page .account-row .gast-knop {
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.55);
+      box-shadow: 0 6px 18px rgba(0,20,60,.16);
+      font-weight: 600;
+    }
+    @media (hover: hover) { .login-page .account-row .gast-knop:hover { background: rgba(255,255,255,.28); } }
 
     /* Dubbeltikken mag geen inzoomen of tekst selecteren veroorzaken */
     html { touch-action: manipulation; }
@@ -1431,6 +1439,12 @@
     }
     maakWiel(document.getElementById("wiel-orig"), "orig");
     maakWiel(document.getElementById("wiel-nieuw"), "nieuw");
+    // Zet de actuele capo als gewone, bewerkbare tekst bovenaan.
+    function zetCapoRegel(tekst, waarde) {
+      const regels = String(tekst || "").replace(/^\s*Capo\s*:\s*[^\n]*(?:\n|$)/i, "");
+      return "Capo: " + waarde + (regels ? "\n" + regels : "");
+    }
+
     // ---------- Tekst aanpassen: pas na het langsvliegen van het logo ----------
     // De tekst wordt altijd verschoven met het verschil tussen nieuw en origineel.
     // "toegepast" houdt bij hoeveel de tekst al is verschoven, dus tweemaal op Oké doet niets extra's.
@@ -1448,6 +1462,11 @@
           nieuw = verkort(nieuw);        // zelf getypte of geplakte akkoorden ook inkorten
           volleTekst = null;
         }
+      }
+      // Capo-regel staat altijd bovenaan en blijft gewone tekst die de gebruiker kan verwijderen.
+      nieuw = zetCapoRegel(nieuw, berekenCapo());
+      if (shorter) {
+        if (volleTekst !== null) volleTekst = zetCapoRegel(volleTekst, berekenCapo());
         verkortTekst = nieuw;
       }
       tekstvak.value = nieuw;
@@ -1546,6 +1565,7 @@
       toegepast = 0;
       resetShorter();
       tekstvak.value = "";
+      document.getElementById("tekstdoos").classList.remove("songtekst");
       toon();
       pulseer();
       logo.classList.remove("draai");
@@ -2566,6 +2586,76 @@
       });
     }
 
+    // Zet tekstfragmenten met hun x/y-positie om naar regels met vaste kolommen.
+    // Daardoor blijft een akkoord boven de letter van het woord staan dat eronder hoort.
+    function plaatsFragmentenOpRegels(fragmenten, yMarge) {
+      const geldig = fragmenten.filter(function(f) { return f.tekst && f.tekst.trim(); });
+      if (!geldig.length) return "";
+      const breedtes = geldig.map(function(f) {
+        return f.breedte > 0 ? f.breedte / Math.max(1, f.tekst.trim().length) : 0;
+      }).filter(function(n) { return n > 0.5 && n < 40; }).sort(function(a,b){ return a-b; });
+      const tekenBreedte = breedtes.length ? breedtes[Math.floor(breedtes.length / 2)] : 6;
+      const minX = Math.min.apply(null, geldig.map(function(f){ return f.x; }));
+      const rijen = [];
+      geldig.sort(function(a,b){ return b.y-a.y || a.x-b.x; }).forEach(function(f) {
+        let rij = rijen.find(function(r){ return Math.abs(r.y-f.y) <= yMarge; });
+        if (!rij) { rij = { y:f.y, delen:[] }; rijen.push(rij); }
+        rij.delen.push(f);
+      });
+      return rijen.sort(function(a,b){ return b.y-a.y; }).map(function(rij) {
+        const cellen = [];
+        rij.delen.sort(function(a,b){ return a.x-b.x; }).forEach(function(f) {
+          const kolom = Math.max(0, Math.round((f.x-minX)/tekenBreedte));
+          const txt = f.tekst.trim();
+          while (cellen.length < kolom) cellen.push(" ");
+          for (let i=0; i<txt.length; i++) {
+            const plek = kolom+i;
+            if (cellen[plek] === undefined || cellen[plek] === " ") cellen[plek] = txt[i];
+            else if (txt[i] !== " ") cellen[plek] = txt[i];
+          }
+        });
+        return cellen.join("").replace(/\s+$/,"");
+      }).join("\n");
+    }
+
+    // Alleen songtekst, akkoordnamen en sectiekoppen houden; drukwerk en muzieksymbolen weghalen.
+    function normaliseerLiedTekst(bron) {
+      let regels = String(bron || "").replace(/\r/g,"\n")
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"")
+        .split("\n");
+      const koppen = /^(intro|instrumentaal|couplet(?:\s*\d+)?|vers(?:e)?(?:\s*\d+)?|refrein|chorus|bridge|tussenstuk|pre-?chorus|outro|solo|interlude)(?:\s*[:：-].*)?$/i;
+      regels = regels.map(function(regel) {
+        return regel
+          .replace(/[♪♫♬♩♭♮♯𝄞𝄢𝄡𝄪𝄫]/g, function(teken){ return teken === "♯" ? "#" : " "; })
+          .replace(/[\u2500-\u257F]/g," ")
+          .replace(/[ \t]+$/g,"");
+      });
+      // OCR kan letters van één woord uit elkaar trekken, bijvoorbeeld "m ij n" of "m i j n".
+      regels = regels.map(function(regel) {
+        let r = regel.replace(/\b([a-z])\s+([a-z]{2,})\s+([a-z])\b/gi, "$1$2$3");
+        r = r.replace(/\b([a-z](?:\s+[a-z]){2,})\b/gi, function(m){ return m.replace(/\s+/g,""); });
+        return r;
+      });
+      regels = regels.filter(function(regel) {
+        const t = regel.trim();
+        if (!t) return true;
+        if (/(?:www\.|https?:\/\/|©|copyright|\binfo(?:rmatie)?\b|\blogo\b|pagina\s+\d+|page\s+\d+|tempo\s*:|key\s*:|toonsoort\s*:|composed?\s+by|arranged?\s+by|written?\s+by|uitgeverij\s*:)/i.test(t)) return false;
+        if (/^\d{1,3}$/.test(t)) return false;
+        // Akkoordregels bestaan vaak uit losse letters met veel tussenruimte (C       G).
+        const restNaAkkoorden = t.replace(akkoordPatroon(), "").replace(/[\s|,;:()[\]{}-]/g, "");
+        if (!restNaAkkoorden && /[A-G]/i.test(t)) return true;
+        const letters = (t.match(/[A-Za-zÀ-ÿ0-9#]/g) || []).length;
+        return letters >= 1 && (letters / Math.max(1,t.length)) >= 0.22;
+      });
+      const uit = [];
+      regels.forEach(function(regel) {
+        const t = regel.trim();
+        if (t && koppen.test(t) && uit.length && uit[uit.length-1] !== "") uit.push("");
+        uit.push(regel);
+      });
+      return uit.join("\n").replace(/\n{3,}/g,"\n\n").trim();
+    }
+
     async function leesPdf(bestand) {
       await laadExterneScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js", function(){ return !!window.pdfjsLib; });
       pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -2574,18 +2664,15 @@
       for (let p = 1; p <= pdf.numPages; p++) {
         const pagina = await pdf.getPage(p);
         const inhoud = await pagina.getTextContent();
-        // Groepeer PDF-tekst op dezelfde basislijn en sorteer regels van boven naar beneden.
-        const regels = new Map();
-        inhoud.items.forEach(function(item){
-          const waarde = (item.str || "").trim();
-          if (!waarde) return;
-          const y = Math.round((item.transform && item.transform[5]) || 0);
-          if (!regels.has(y)) regels.set(y, []);
-          regels.get(y).push({ x: (item.transform && item.transform[4]) || 0, tekst: waarde });
+        const fragmenten = inhoud.items.map(function(item) {
+          return {
+            x: (item.transform && item.transform[4]) || 0,
+            y: (item.transform && item.transform[5]) || 0,
+            breedte: item.width || 0,
+            tekst: item.str || ""
+          };
         });
-        let tekst = Array.from(regels.entries()).sort(function(a,b){ return b[0]-a[0]; })
-          .map(function(regel){ return regel[1].sort(function(a,b){ return a.x-b.x; }).map(function(item){ return item.tekst; }).join(" "); })
-          .join("\n").trim();
+        let tekst = plaatsFragmentenOpRegels(fragmenten, 2.5);
         // Sommige PDF's bestaan alleen uit scans; voer dan OCR uit op de pagina.
         if (tekst.replace(/\s/g, "").length < 12) {
           const viewport = pagina.getViewport({ scale: 1.8 });
@@ -2608,7 +2695,17 @@
           }
         }
       });
-      return resultaat.data.text || "";
+      const woorden = (resultaat.data && resultaat.data.words || []).filter(function(w){ return w.text && w.bbox; });
+      if (!woorden.length) return (resultaat.data && resultaat.data.text) || "";
+      const fragmenten = woorden.map(function(w) {
+        return {
+          x: w.bbox.x0,
+          y: -((w.bbox.y0 + w.bbox.y1) / 2),
+          breedte: w.bbox.x1-w.bbox.x0,
+          tekst: w.text
+        };
+      });
+      return plaatsFragmentenOpRegels(fragmenten, 12);
     }
 
     async function leesDocument(bestand) {
@@ -2643,10 +2740,11 @@
       const oudeLabel = "Document invoegen";
       label.textContent = "Document lezen...";
       try {
-        const herkendeTekst = (await leesDocument(bestand)).replace(/\r/g,"\n").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"").trim();
-        if (!herkendeTekst) throw new Error("Ik kon geen leesbare tekst vinden in dit bestand.");
-        // De tekst wordt in de leesvolgorde van pagina's/regels overgenomen; lege regels blijven behouden.
-        tekstvak.value = herkendeTekst.replace(/\n[ \t]+/g,"\n").replace(/\n{3,}/g,"\n\n");
+        const herkendeTekst = normaliseerLiedTekst(await leesDocument(bestand));
+        if (!herkendeTekst) throw new Error("Ik kon geen leesbare songtekst of akkoorden vinden in dit bestand.");
+        // Alleen songtekst en akkoorden worden ingevoegd; kolomuitlijning en secties blijven behouden.
+        tekstvak.value = herkendeTekst;
+        document.getElementById("tekstdoos").classList.add("songtekst");
         tekstvak.dispatchEvent(new Event("input", { bubbles:true }));
         tekstvak.scrollTop = 0;
         if (shorter) {
