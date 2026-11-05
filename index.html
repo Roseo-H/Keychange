@@ -1359,11 +1359,15 @@
     // Een kleine "m" (mineur) blijft staan, want Am en A zijn twee verschillende akkoorden.
     // Het weggehaalde stuk wordt met spaties opgevuld, zodat de rest van de regel niet opschuift.
     function verkort(tekst) {
-      return tekst.replace(akkoordPatroon(), function (_, voor, letter, teken, uitbreiding) {
-        const mineur = /^m(?!aj)/.test(uitbreiding) ? "m" : "";
-        const kort = letter + teken + mineur;
-        const origineleLengte = (letter + teken + uitbreiding).length;
-        return voor + kort.padEnd(origineleLengte, " ");
+      // Verbeterde versie: haalt cijfers, /bas, sus, add, maj, dim, aug, etc. weg.
+      // Behoudt alleen de grondtoon (+ # of b) en een kleine "m" als het een mineurakkoord is.
+      // Voorbeelden: Cmaj7 -> C, G7 -> G, Dsus4 -> D, Cadd9 -> C, Am7 -> Am, C/G -> C, F#m7b5 -> F#m
+      return tekst.replace(akkoordPatroon(), function (heel, voor, letter, teken, uitbreiding, bas, basTeken) {
+        const mineur = /^m(?!aj)/i.test(uitbreiding || "") ? "m" : "";
+        const kort = letter + (teken || "") + mineur;
+        // Bereken de lengte van het hele akkoord inclusief eventuele /bas voor de uitlijning
+        const oudAkkoord = heel.slice(voor.length);
+        return voor + kort.padEnd(oudAkkoord.length, " ");
       });
     }
     // Capo: gelijk -> 0
@@ -2533,13 +2537,47 @@
         dlg.classList.add("open");
         dlgKlaar = function (antwoord) {
           dlg.classList.remove("open");
+          // Reset keyboard-adjustment styles
+          dlg.style.alignItems = "";
+          dlg.style.paddingTop = "";
           dlgKlaar = null;
           klaar(antwoord);
         };
         setTimeout(function () {
-          if (o.invoer) { dlgInvoer.focus(); dlgInvoer.select(); } else { dlgJa.focus(); }
+          if (o.invoer) { 
+            dlgInvoer.focus(); 
+            dlgInvoer.select(); 
+            // Zorg dat het invoerveld boven het toetsenbord blijft op mobiel
+            pasDlgVoorToetsenbord();
+          } else { dlgJa.focus(); }
         }, 60);
       });
+    }
+
+    // Houd de dialog boven het toetsenbord op telefoons
+    function pasDlgVoorToetsenbord() {
+      if (!window.visualViewport) return;
+      const dlgKaart = document.querySelector(".dlg-kaart");
+      if (!dlgKaart || !dlg.classList.contains("open")) return;
+      const vv = window.visualViewport;
+      const keyboardHoogte = window.innerHeight - vv.height;
+      if (keyboardHoogte > 100) {
+        // Toetsenbord is zichtbaar: schuif de dialog omhoog
+        dlg.style.alignItems = "flex-start";
+        dlg.style.paddingTop = Math.max(20, vv.offsetTop + 20) + "px";
+        dlgKaart.style.marginTop = "0";
+        // Zorg dat het invoerveld in beeld is
+        setTimeout(() => dlgInvoer.scrollIntoView({ block: "center", behavior: "smooth" }), 100);
+      } else {
+        // Toetsenbord weg: terug naar midden
+        dlg.style.alignItems = "";
+        dlg.style.paddingTop = "";
+        dlgKaart.style.marginTop = "";
+      }
+    }
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", pasDlgVoorToetsenbord);
+      window.visualViewport.addEventListener("scroll", pasDlgVoorToetsenbord);
     }
     document.getElementById("dlgForm").addEventListener("submit", function (e) {
       e.preventDefault();
@@ -2778,8 +2816,14 @@
     documentBestand.addEventListener("change", async function(){
       const bestand = documentBestand.files && documentBestand.files[0];
       if (!bestand) return;
-      if (tekstvak.value.trim() && !window.confirm("De huidige tekst in het tekstvak vervangen door de inhoud van dit document?")) {
-        documentBestand.value = ""; return;
+      // Op mobiel soms geen confirm, dus altijd vragen via onze dialog als er tekst staat
+      if (tekstvak.value.trim()) {
+        const vervangen = await toonDlg({
+          titel: "Tekst vervangen?",
+          uitleg: "Er staat al tekst in het vak. Wil je die vervangen door de inhoud van dit document?",
+          ja: "Vervangen", nee: "Annuleren"
+        });
+        if (!vervangen) { documentBestand.value = ""; return; }
       }
       documentBezig = true;
       documentInvoegenKnop.disabled = true;
@@ -2787,9 +2831,11 @@
       const oudeLabel = "Document invoegen";
       label.textContent = "Document lezen...";
       try {
+        toonMelding("Document wordt gelezen... Dit kan even duren bij scans of afbeeldingen.");
         const herkendeTekst = normaliseerLiedTekst(await leesDocument(bestand));
-        if (!herkendeTekst) throw new Error("Ik kon geen leesbare songtekst of akkoorden vinden in dit bestand.");
-        // Alleen songtekst en akkoorden worden ingevoegd; kolomuitlijning en secties blijven behouden.
+        if (!herkendeTekst || herkendeTekst.trim().length < 5) {
+          throw new Error("Ik kon geen leesbare songtekst of akkoorden vinden. Probeer een duidelijker bestand of een ander formaat (PDF, DOCX, afbeelding of tekst).");
+        }
         tekstvak.value = herkendeTekst;
         document.getElementById("tekstdoos").classList.add("songtekst");
         tekstvak.dispatchEvent(new Event("input", { bubbles:true }));
@@ -2802,10 +2848,16 @@
         toonMelding("Document ingelezen. Controleer de akkoorden en tekst even op herkenningsfouten.");
       } catch (fout) {
         console.error("Document invoegen:", fout);
-        toonMelding(fout.message || "Het document kon niet worden gelezen.");
+        let msg = fout.message || "Het document kon niet worden gelezen.";
+        if (msg.includes("bibliotheek") || msg.includes("geladen")) {
+          msg = "Een hulpbibliotheek kon niet worden geladen. Controleer je internetverbinding en probeer opnieuw.";
+        }
+        toonMelding(msg);
       } finally {
-        documentBezig = false; documentInvoegenKnop.disabled = false;
-        label.textContent = oudeLabel; documentBestand.value = "";
+        documentBezig = false; 
+        documentInvoegenKnop.disabled = false;
+        label.textContent = oudeLabel; 
+        documentBestand.value = "";
       }
     });
 
